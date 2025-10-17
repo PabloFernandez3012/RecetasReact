@@ -1,0 +1,227 @@
+[
+  {
+    "id": "ensalada01",
+    "title": "Ensalada Mediterránea",
+    "description": "Ensalada fresca con tomate, pepino, aceitunas y queso feta.",
+    "ingredients": [
+      "2 tomates",
+      "1 pepino",
+      "100g queso feta",
+      "Aceitunas negras",
+      "Aceite de oliva",
+      "Sal",
+      "Orégano"
+    ],
+    "steps": [
+      "Corta los tomates y el pepino en cubos.",
+      "Mezcla con las aceitunas y el queso feta desmenuzado.",
+      "Aliña con aceite de oliva, sal y orégano."
+    ],
+    "image": "data:image/jpeg;base64,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",
+    "category": [
+      "saladas",
+      "ensaladas",
+      "almuerzo"
+    ]
+  },
+  {
+    "id": "pasta01",
+    "title": "Pasta al Pesto",
+    "description": "Pasta con salsa pesto casera.",
+    "ingredients": [
+      "200g pasta",
+      "Albahaca",
+      "Piñones",
+      "Ajo",
+      "Parmesano",
+      "Aceite de oliva",
+      "Sal"
+    ],
+    "steps": [
+      "Cuece la pasta según instrucciones.",
+      "Tritura albahaca, piñones, ajo, parmesano y aceite.",
+      "Mezcla la pasta con el pesto y sirve."
+    ],
+    "image": "https://encrypted-tbn2.gstatic.com/images?q=tbn:ANd9GcTgrhDgA8KJlVFl-ZXLXpWsWer71tbybmLRjkJjSPVGDmApWroRybEnzsl8CNQ5CBoqqwJsiqs-EBGJQB6dXecQg_eVpxY9A_FKs5LHOfRYNg",
+    "category": [
+      "saladas",
+      "pastas",
+      "almuerzo"
+    ]
+  },
+  {
+    "id": "tortilla01",
+    "title": "Tortilla de Patatas",
+    "description": "Clásica tortilla española jugosa.",
+    "ingredients": [
+      "4 huevos",
+      "3 patatas",
+      "1 cebolla",
+      "Aceite de oliva",
+      "Sal"
+    ],
+    "steps": [
+      "Fríe las patatas y la cebolla.",
+      "Bate los huevos y mezcla con las patatas.",
+      "Cuaja en sartén por ambos lados."
+    ],
+    "image": "https://encrypted-tbn1.gstatic.com/images?q=tbn:ANd9GcTJVcppkXTl68IGH2JJ_W4RWNiF6dc78mJcz9YEBbq6kT6MwD9BZW3_htTRijBpNLH3tziUa1t21oZrqxlnzhu1z3WpnX4YTuwm9SCS3C7cUw",
+    "category": [
+      "saladas",
+      "tortillas",
+      "almuerzo"
+    ]
+  },
+  {
+    "id": "DefhZ0M2pC",
+    "title": "Ensalada poke de atún y algas con aguacate",
+    "description": "Ensalada Hawaiana, sana y rápida de hacer",
+    "ingredients": [
+      "Atún fresco 150 g",
+      "Alga wakame seca 3 g",
+      "Cebolleta pequeña 1",
+      "Aguacate pequeño (o medio grande) 1",
+      "Sal una pizca",
+      "Aceite de sésamo opcional 2 ml",
+      "cebollino a gusto"
+    ],
+    "steps": [
+      "Si usamos pescado congelado, descongelar la noche antes sobre una rejilla en la parte menos fría de la nevera. Secar bien con papel de cocina y cortar en cubos de tamaño de un bocado con un buen cuchillo. Reservar.",
+      "Rehidratar las algas wakame y las hijiki en un cuenco con agua caliente, unos 5-10 minutos. Escurrir muy bien y picar. Lavar y picar la cebolleta muy fina y el cebollino. Cortar en gajos el aguacate sin la piel. Tostar las semillas de sésamo si se desea.",
+      "Disponer en un plato o fuente el pescado y mezclar con la cebolleta, la mitad del cebollino, las algas, la salsa de soja y el aceite de sésamo. Colocar en un cuenco de servir y añadir el aguacate, al que mojaremos con un poco de zumo de lima o limón. Añadir un poco de cayena, sal y decorar con el resto del cebollino."
+    ],
+    "image": "https://i.blogs.es/a87bbf/ensalada-poke-de-atun-y-algas-con/1366_2000.jpeg",
+    "category": [
+      "ensaladas",
+      "almuerzo",
+      "desayuno"
+    ]
+  },
+  {
+    "id": "HIbmK0mVha",
+    "title": "Carlota de limón",
+    "description": "la receta de postre más cremosa, fácil y rápida",
+    "ingredients": [
+      "Leche condensada 300 g",
+      "Leche evaporada 300 g",
+      "Limón unidades (para el zumo) 3",
+      "Galletas tipo María paquete 1",
+      "Polvillo de galleta para la cobertura",
+      "Nata montada para decorar"
+    ],
+    "steps": [
+      "Para empezar exprimiremos y colaremos el jugo de limón para mezclarlo con el azúcar. En un cuenco amplio mezclamos la leche condensada, la leche evaporada y el zumo de limón.",
+      "Colocamos en la base de un molde redondo desmoldable una tanda de galletas maría y cubrimos con un cucharón de crema. Repetimos el proceso hasta terminar los ingredientes teniendo en cuenta que la última capa debe ser de crema.",
+      "Cubrimos el pastel con film transparente y dejamos en la nevera hasta el día siguiente. Trituramos algunas galletas hasta obtener un polvillo fino que utilizaremos para decorar nuestro pastel.",
+      "Al día siguiente desmoldamos cuidadosamente la tarta, cubrimos con el polvillo de galleta y decoramos con copetes de nata montada."
+    ],
+    "image": "https://i.blogs.es/2aae23/carlota_limon/1366_2000.jpg",
+    "category": [
+      "merienda",
+      "tortas",
+      "postres"
+    ]
+  },
+  {
+    "id": "l9R_wKNqQT",
+    "title": "Mousse de oreo ",
+    "description": "el postre perfecto para un capricho dulce",
+    "ingredients": [
+      "Galletas Oreo 22",
+      "Nata líquida para montar 500 ml",
+      "Queso crema 50 g",
+      "Azúcar glas 15 g"
+    ],
+    "steps": [
+      "Primero trituraremos las galletas y las reservamos para más tarde.",
+      "Mezclamos la nata para montar con el queso crema y el azúcar glas, y batimos con unas varillas hasta obtener una crema de consistencia firme.",
+      "Agregamos poco a poco la mezcla de galletas a la nata montada con ayuda de una espátula de silicona haciendo movimientos envolventes.",
+      "Repartimos la mezcla en vasitos individuales y los reservamos al menos 4 horas en la nevera antes de servirlos."
+    ],
+    "image": "https://i.blogs.es/0e8a28/mousse_oreo/1366_2000.jpg",
+    "category": [
+      "merienda",
+      "postres",
+      "galletas"
+    ]
+  },
+  {
+    "id": "opE2Q_X8We",
+    "title": "Smoothie de fresa",
+    "description": "El smoothie de fresas es una receta ideal para el calor. Se hace en un periquete y tenemos un desayuno o merienda estupendo.",
+    "ingredients": [
+      "600 g de fresas congeladas",
+      "150 g de leche entera"
+    ],
+    "steps": [
+      "Ponemos 600 gramos de fresas y 150 gramos de leche entera en el vaso de la batidora.",
+      "Batimos hasta que tengamos una mezcla homogénea y sin trozos de fresas.",
+      "Servimos en los vasos y consumimos inmediatamente."
+    ],
+    "image": "https://imag.bonviveur.com/smoothie-de-fresa.webp",
+    "category": [
+      "bebidas-sin",
+      "postres",
+      "desayuno",
+      "merienda"
+    ]
+  },
+  {
+    "id": "Y9JdsbUhO9",
+    "title": " Vermut casero",
+    "description": "Atrévete a preparar tu propio vermut casero con una cuidada selección de hierbas. ",
+    "ingredients": [
+      "1 cucharadita de ajenjo",
+      "1 cucharadita de flores de aciano",
+      "2 cucharaditas de flores de manzanilla",
+      "1 cucharadita de flores de lavanda",
+      "1 trozo de rama de canela",
+      "750 ml de vino blanco",
+      "200 ml de vodka",
+      "30 a 130 g de azúcar por litro de preparación final"
+    ],
+    "steps": [
+      "Mezclar todo"
+    ],
+    "image": "https://imag.bonviveur.com/vermut.webp",
+    "category": [
+      "bebidas-con",
+      "desayuno",
+      "almuerzo",
+      "merienda",
+      "cena"
+    ]
+  },
+  {
+    "id": "kMwEJ_PylN",
+    "title": "Torta de Cumpleaños",
+    "description": "Puedes personalizar la decoración con frutas o chocolate blanco para un contraste.",
+    "ingredients": [
+      "1 unidad (diámetro 20 cm) Bizcocho de vainilla",
+      "200 g Frutillas frescas",
+      "200 ml Crema de leche",
+      "40 g Azúcar",
+      "150 g Dulce de leche",
+      "100 g Merengue",
+      "100 g Chocolate negro",
+      "300 g Mousse de dulce de leche"
+    ],
+    "steps": [
+      "Corta el bizcocho en 3 capas iguales.",
+      "Bate la crema con azúcar hasta punto chantilly.",
+      "Coloca la primera capa de bizcocho, cubre con crema y frutillas en rodajas.",
+      "Añade la segunda capa, unta con dulce de leche y esparce merengue.",
+      "Cubre con la última capa de bizcocho.",
+      "Extiende mousse de dulce de leche por toda la torta.",
+      "Derrite el chocolate negro y decora haciendo un efecto decaído sobre la mousse.",
+      "Decora como te guste, agrega carteles y velas"
+    ],
+    "image": "https://img-global.cpcdn.com/recipes/7ddf4df3cac00c01/600x852f0.5_0.401675_1.0q80/torta-de-cumpleanos-foto-principal.webp",
+    "category": [
+      "tortas",
+      "cumpleanos",
+      "postres",
+      "merienda"
+    ]
+  }
+]
