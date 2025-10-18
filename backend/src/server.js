@@ -4,6 +4,7 @@ import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
 import { promises as fs } from 'fs';
 import { nanoid } from 'nanoid';
+import { getAllRecipes, getRecipe, createRecipe, updateRecipe, deleteRecipe, migrateFromJsonIfEmpty, paths } from './db.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -28,12 +29,11 @@ app.get('/', (_req, res) => {
 });
 
 async function readRecipes() {
-  await ensureDataFile();
-  const text = await fs.readFile(dataPath, 'utf-8');
-  return JSON.parse(text);
+  return getAllRecipes();
 }
 
 async function writeRecipes(recipes) {
+  // Ya no se usa con DB; se mantiene por compatibilidad en algunos flujos
   await fs.writeFile(dataPath, JSON.stringify(recipes, null, 2), 'utf-8');
 }
 
@@ -52,8 +52,7 @@ app.get('/api/recipes', async (_req, res) => {
 
 app.get('/api/recipes/:id', async (req, res) => {
   try {
-    const recipes = await readRecipes();
-    const recipe = recipes.find(r => r.id === req.params.id);
+    const recipe = getRecipe(req.params.id);
     if (!recipe) return res.status(404).json({ error: 'Receta no encontrada' });
     res.json(recipe);
   } catch (err) {
@@ -73,7 +72,7 @@ app.post('/api/recipes', async (req, res) => {
     } else {
       catArr = ['saladas'];
     }
-    const newRecipe = {
+    const created = createRecipe({
       id: nanoid(10),
       title,
       description,
@@ -81,11 +80,8 @@ app.post('/api/recipes', async (req, res) => {
       steps: Array.isArray(steps) ? steps : [],
       image: image || '',
       category: catArr
-    };
-    const recipes = await readRecipes();
-    recipes.push(newRecipe);
-    await writeRecipes(recipes);
-    res.status(201).json(newRecipe);
+    });
+    res.status(201).json(created);
   } catch (err) {
     res.status(500).json({ error: 'Error creando receta', details: String(err) });
   }
@@ -95,10 +91,9 @@ app.put('/api/recipes/:id', async (req, res) => {
   try {
     const { id } = req.params;
     const { title, description, ingredients, steps, image, category } = req.body;
-    const recipes = await readRecipes();
-    const idx = recipes.findIndex(r => r.id === id);
-    if (idx === -1) return res.status(404).json({ error: 'Receta no encontrada' });
-    let catArr = recipes[idx].category || [];
+    const existing = getRecipe(id);
+    if (!existing) return res.status(404).json({ error: 'Receta no encontrada' });
+    let catArr = existing.category || [];
     if (category !== undefined) {
       if (Array.isArray(category)) {
         catArr = category.filter(c => typeof c === 'string' && c.trim()).map(c => c.trim());
@@ -106,17 +101,14 @@ app.put('/api/recipes/:id', async (req, res) => {
         catArr = [category.trim()];
       }
     }
-    const updated = {
-      ...recipes[idx],
+    const updated = updateRecipe(id, {
       ...(title !== undefined ? { title } : {}),
       ...(description !== undefined ? { description } : {}),
       ...(ingredients !== undefined ? { ingredients } : {}),
       ...(steps !== undefined ? { steps } : {}),
       ...(image !== undefined ? { image } : {}),
       category: catArr
-    };
-    recipes[idx] = updated;
-    await writeRecipes(recipes);
+    });
     res.json(updated);
   } catch (err) {
     res.status(500).json({ error: 'Error actualizando receta', details: String(err) });
@@ -126,11 +118,8 @@ app.put('/api/recipes/:id', async (req, res) => {
 app.delete('/api/recipes/:id', async (req, res) => {
   try {
     const { id } = req.params;
-    const recipes = await readRecipes();
-    const exists = recipes.some(r => r.id === id);
-    if (!exists) return res.status(404).json({ error: 'Receta no encontrada' });
-    const filtered = recipes.filter(r => r.id !== id);
-    await writeRecipes(filtered);
+    const ok = deleteRecipe(id);
+    if (!ok) return res.status(404).json({ error: 'Receta no encontrada' });
     res.status(204).send();
   } catch (err) {
     res.status(500).json({ error: 'Error eliminando receta', details: String(err) });
@@ -138,6 +127,16 @@ app.delete('/api/recipes/:id', async (req, res) => {
 });
 
 const PORT = process.env.PORT || 3001;
-app.listen(PORT, () => {
-  console.log(`API de recetas escuchando en http://localhost:${PORT}`);
+// Intentar migrar datos existentes desde recipes.json a SQLite la primera vez
+migrateFromJsonIfEmpty(dataPath).then((migrated) => {
+  if (migrated > 0) {
+    console.log(`Migradas ${migrated} recetas desde JSON a SQLite. DB: ${paths.dbPath}`);
+  }
+  app.listen(PORT, () => {
+    console.log(`API de recetas escuchando en http://localhost:${PORT}`);
+  });
+}).catch(() => {
+  app.listen(PORT, () => {
+    console.log(`API de recetas escuchando en http://localhost:${PORT}`);
+  });
 });
