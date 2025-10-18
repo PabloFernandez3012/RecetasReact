@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
+import { apiUrl } from '../lib/api'
 
 export default function RecipeList() {
   const [recipes, setRecipes] = useState([])
@@ -10,7 +11,7 @@ export default function RecipeList() {
   const q = (sp.get('q') || '').toLowerCase()
 
   useEffect(() => {
-    fetch('/api/recipes')
+    fetch(apiUrl('/api/recipes'))
       .then(r => r.json())
       .then(setRecipes)
       .finally(() => setLoading(false))

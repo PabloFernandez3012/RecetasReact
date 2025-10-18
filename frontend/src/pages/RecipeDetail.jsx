@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Link, useParams, useNavigate } from 'react-router-dom'
+import { apiUrl } from '../lib/api'
 
 export default function RecipeDetail() {
   const { id } = useParams()
@@ -9,7 +10,7 @@ export default function RecipeDetail() {
   const [error, setError] = useState('')
 
   useEffect(() => {
-    fetch(`/api/recipes/${id}`)
+    fetch(apiUrl(`/api/recipes/${id}`))
       .then(async r => {
         if (!r.ok) throw new Error('No encontrado')
         return r.json()
@@ -21,7 +22,7 @@ export default function RecipeDetail() {
 
   const onDelete = async () => {
     if (!confirm('¿Eliminar receta?')) return
-    const r = await fetch(`/api/recipes/${id}`, { method: 'DELETE' })
+    const r = await fetch(apiUrl(`/api/recipes/${id}`), { method: 'DELETE' })
     if (r.status === 204) {
       navigate('/')
     }

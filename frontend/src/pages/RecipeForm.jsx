@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
+import { apiUrl } from '../lib/api'
 
 const empty = { title: '', description: '', ingredients: [''], steps: [''], image: '', category: [] }
 
@@ -61,7 +62,7 @@ export default function RecipeForm() {
   useEffect(() => {
     if (isEdit) {
       setLoading(true)
-      fetch(`/api/recipes/${id}`).then(r => r.json()).then(r => {
+  fetch(apiUrl(`/api/recipes/${id}`)).then(r => r.json()).then(r => {
         const cats = Array.isArray(r.category) ? r.category : (r.category ? [r.category] : [])
         setData({
           title: r.title || '',
@@ -101,7 +102,7 @@ export default function RecipeForm() {
     e.preventDefault()
     setLoading(true)
     const method = isEdit ? 'PUT' : 'POST'
-    const url = isEdit ? `/api/recipes/${id}` : '/api/recipes'
+  const url = isEdit ? apiUrl(`/api/recipes/${id}`) : apiUrl('/api/recipes')
     const r = await fetch(url, {
       method,
       headers: { 'Content-Type': 'application/json' },

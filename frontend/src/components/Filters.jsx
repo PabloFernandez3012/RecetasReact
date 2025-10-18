@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
+import { apiUrl } from '../lib/api'
 
 const DEFAULT_CATEGORIES = [
   { key: 'todas', label: 'Todas las recetas' },
@@ -28,7 +29,7 @@ export default function Filters() {
 
   useEffect(() => {
     setLoading(true)
-    fetch('/api/recipes')
+    fetch(apiUrl('/api/recipes'))
       .then(r => r.json())
       .then(setRecipes)
       .finally(() => setLoading(false))

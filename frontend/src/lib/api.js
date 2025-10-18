@@ -1,0 +1,6 @@
+const base = import.meta.env.VITE_API_BASE?.replace(/\/$/, '') || ''
+
+export function apiUrl(path) {
+  if (!path.startsWith('/')) path = '/' + path
+  return base + path
+}
