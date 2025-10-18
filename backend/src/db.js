@@ -1,14 +1,16 @@
 import Database from 'better-sqlite3'
 import { fileURLToPath } from 'url'
 import { dirname, join } from 'path'
-import { promises as fs } from 'fs'
+import fs from 'fs'
+import { promises as fsp } from 'fs'
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = dirname(__filename)
 const dataDir = join(__dirname, 'data')
 const dbPath = join(dataDir, 'recipes.db')
 
-await fs.mkdir(dataDir, { recursive: true })
+// Asegurar carpeta de datos (sin top-level await)
+try { fs.mkdirSync(dataDir, { recursive: true }) } catch {}
 
 // Abrir DB y asegurar esquema
 const db = new Database(dbPath)
@@ -73,7 +75,7 @@ export function createRecipe(recipe) {
     ingredients: JSON.stringify(r.ingredients ?? []),
     steps: JSON.stringify(r.steps ?? []),
     image: r.image ?? '',
-    category: JSON.stringify(r.category ?? []),
+    category: JSON.stringify(Array.isArray(r.category) ? r.category : (r.category ? [r.category] : [])),
     createdAt: r.createdAt,
     updatedAt: r.updatedAt,
   })
@@ -114,7 +116,7 @@ export async function migrateFromJsonIfEmpty(jsonPath) {
   const count = db.prepare('SELECT COUNT(*) as c FROM recipes').get().c
   if (count > 0) return 0
   try {
-    const text = await fs.readFile(jsonPath, 'utf-8')
+    const text = await fsp.readFile(jsonPath, 'utf-8')
     const arr = JSON.parse(text)
     if (!Array.isArray(arr) || arr.length === 0) return 0
     const insert = db.prepare(`
