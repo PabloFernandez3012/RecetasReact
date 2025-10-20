@@ -120,11 +120,63 @@ h1 a {
 
 main {
   margin-top: 16px;
+  min-height: 60vh;
 }
 
-footer {
-  margin: 24px 0;
-  color: var(--muted);
+// Footer styles
+.site-footer {
+  margin-top: 48px;
+  padding: 24px 0;
+  border-top: 1px solid var(--card-b);
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  align-items: center;
+
+  .footer-links {
+    display: flex;
+    gap: 24px;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .footer-link {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 20px;
+    background: var(--card);
+    border: 1px solid var(--card-b);
+    border-radius: 12px;
+    color: var(--fg);
+    text-decoration: none;
+    font-weight: 600;
+    transition: all .2s ease;
+    box-shadow: var(--shadow);
+
+    &:hover {
+      background: var(--accent);
+      color: #001;
+      transform: translateY(-2px);
+      box-shadow: 0 12px 36px rgba(34, 211, 238, .2);
+    }
+  }
+
+  .footer-credits {
+    color: var(--muted);
+    text-align: center;
+  }
+
+  @media (max-width: 600px) {
+    .footer-links {
+      flex-direction: column;
+      gap: 12px;
+      width: 100%;
+    }
+    .footer-link {
+      justify-content: center;
+    }
+  }
 }
 
 .list {
