@@ -40,6 +40,10 @@ body {
   background: var(--bg);
   color: var(--fg);
   min-height: 100vh;
+}
+
+#root {
+  min-height: 100vh;
   display: flex;
   flex-direction: column;
 }
