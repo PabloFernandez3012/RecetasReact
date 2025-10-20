@@ -1,5 +1,6 @@
 import { Link, Route, Routes } from 'react-router-dom'
 import MegaMenu from './components/MegaMenu'
+import ThemeToggle from './components/ThemeToggle'
 import RecipeList from './pages/RecipeList'
 import RecipeDetail from './pages/RecipeDetail'
 import RecipeForm from './pages/RecipeForm'
@@ -9,6 +10,7 @@ export default function App() {
     <div className="container">
       <header>
         <h1><Link to="/">Recetas de Pablo</Link></h1>
+        <ThemeToggle />
         <nav style={{display:'flex',alignItems:'center',gap:12,flexWrap:'wrap', width:'100%'}}>
           <MegaMenu />
           <div style={{flexGrow:1}} />
