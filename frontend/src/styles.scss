@@ -39,12 +39,19 @@ body {
   font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial;
   background: var(--bg);
   color: var(--fg);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
 }
 
 .container {
   max-width: 980px;
   margin: 0 auto;
   padding: 16px;
+  width: 100%;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
 }
 
 header.site-header {
@@ -120,7 +127,7 @@ h1 a {
 
 main {
   margin-top: 16px;
-  min-height: 60vh;
+  flex: 1;
 }
 
 // Footer styles
