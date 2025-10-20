@@ -1,31 +1,31 @@
-$bg-dark: #0f172a;
-$bg-light: #f8fafc;
-$fg-dark: #e2e8f0;
-$fg-light: #0f172a;
-$muted-dark: #94a3b8;
-$muted-light: #475569;
-$card-dark: #111827;
-$card-light: #fff;
-$accent: #22d3ee;
-$danger: #ef4444;
-$card-b-dark: #1f2937;
-$card-b-light: #e2e8f0;
-$shadow-dark: 0 10px 30px rgba(0,0,0,.3);
-$shadow-light: 0 10px 30px rgba(2,6,23,.08);
+$bg-beige: #f5e6d3;
+$bg-light: #fff8f0;
+$fg-orange: #d97706;
+$fg-dark-orange: #c2410c;
+$muted-orange: #ea580c;
+$muted-light: #9a3412;
+$card-beige: #fef3e2;
+$card-light: #fffbf5;
+$accent: #fb923c;
+$danger: #dc2626;
+$card-b-beige: #f0dcc4;
+$card-b-light: #f5e6d3;
+$shadow-beige: 0 10px 30px rgba(217, 119, 6, .15);
+$shadow-light: 0 10px 30px rgba(234, 88, 12, .1);
 
 :root {
-  --bg: #{$bg-dark};
-  --fg: #{$fg-dark};
-  --muted: #{$muted-dark};
-  --card: #{$card-dark};
+  --bg: #{$bg-beige};
+  --fg: #{$fg-orange};
+  --muted: #{$muted-orange};
+  --card: #{$card-beige};
   --accent: #{$accent};
   --danger: #{$danger};
-  --card-b: #{$card-b-dark};
-  --shadow: #{$shadow-dark};
+  --card-b: #{$card-b-beige};
+  --shadow: #{$shadow-beige};
 }
 [data-theme="light"] {
   --bg: #{$bg-light};
-  --fg: #{$fg-light};
+  --fg: #{$fg-dark-orange};
   --muted: #{$muted-light};
   --card: #{$card-light};
   --accent: #{$accent};
@@ -52,13 +52,13 @@ header.site-header {
   top: 0;
   z-index: 10;
   backdrop-filter: saturate(180%) blur(10px);
-  background: rgba(11, 18, 32, .75);
+  background: rgba(245, 230, 211, .95);
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 12px;
   padding: 12px 0;
-  border-bottom: 1px solid var(--card-b);
+  border-bottom: 2px solid var(--accent);
 }
 
 h1 a {
@@ -90,13 +90,14 @@ h1 a {
 
 .btn {
   background: var(--accent);
-  color: #001;
+  color: #fff;
   border: none;
   padding: 8px 12px;
   border-radius: 6px;
   cursor: pointer;
   text-decoration: none;
   display: inline-block;
+  font-weight: 600;
   &.icon {
     width: 36px;
     height: 36px;
@@ -167,8 +168,8 @@ input, textarea {
   width: 100%;
   padding: 8px;
   border-radius: 6px;
-  border: 1px solid var(--card-b);
-  background: #0b1220;
+  border: 2px solid var(--card-b);
+  background: #fffbf5;
   color: var(--fg);
 }
 
