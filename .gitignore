@@ -1,5 +1,7 @@
 node_modules
 frontend/dist
 backend/src/data/*.db
+backend/src/data/*.db-wal
+backend/src/data/*.db-shm
 *.log
 .env
