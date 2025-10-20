@@ -147,32 +147,37 @@ main {
     display: flex;
     align-items: center;
     gap: 12px;
-    padding: 12px 24px;
-    background: var(--card);
-    border: 1px solid var(--card-b);
+    padding: 14px 28px;
+    background: rgba(255, 255, 255, 0.08);
+    border: 2px solid var(--accent);
     border-radius: 12px;
-    color: white;
+    color: #ffffff;
     text-decoration: none;
-    font-weight: 600;
+    font-weight: 700;
+    font-size: 1.05em;
+    letter-spacing: 0.3px;
     transition: all .2s ease;
-    box-shadow: var(--shadow);
-    min-width: 160px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    min-width: 180px;
+    backdrop-filter: blur(10px);
 
     .footer-bullet {
       color: var(--accent);
-      font-size: 1.5em;
+      font-size: 1.8em;
       line-height: 1;
       transition: transform .2s ease;
+      font-weight: 900;
     }
 
     &:hover {
       background: var(--accent);
-      color: #001;
+      color: #000;
+      border-color: var(--accent);
       transform: translateY(-2px);
-      box-shadow: 0 12px 36px rgba(34, 211, 238, .2);
+      box-shadow: 0 12px 36px rgba(34, 211, 238, .4);
 
       .footer-bullet {
-        color: #001;
+        color: #000;
         transform: scale(1.3);
       }
     }
