@@ -6,13 +6,16 @@ export default function Footer() {
       <div className="footer-content">
         <div className="footer-links">
           <Link to="/?cat=saladas" className="footer-link">
-            🍕 Comida Salada
+            <span className="footer-bullet">•</span>
+            Comida Salada
           </Link>
           <Link to="/?cat=postres" className="footer-link">
-            🍰 Postres
+            <span className="footer-bullet">•</span>
+            Postres
           </Link>
           <Link to="/?cat=bebidas" className="footer-link">
-            🥤 Bebidas
+            <span className="footer-bullet">•</span>
+            Bebidas
           </Link>
         </div>
         <div className="footer-right">
