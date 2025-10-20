@@ -5,7 +5,7 @@ export default function Footer() {
     <footer className="site-footer">
       <div className="footer-content">
         <div className="footer-section">
-          <h3 className="footer-title">Categorías</h3>
+          <h3 className="footer-title">Categorías de Recetas</h3>
           <div className="footer-links">
             <Link to="/?cat=saladas" className="footer-link">
               Comida Salada
@@ -15,6 +15,27 @@ export default function Footer() {
             </Link>
             <Link to="/?cat=bebidas" className="footer-link">
               Bebidas
+            </Link>
+            <Link to="/?cat=ensaladas" className="footer-link">
+              Ensaladas
+            </Link>
+            <Link to="/?cat=sopas" className="footer-link">
+              Sopas
+            </Link>
+            <Link to="/?cat=pastas" className="footer-link">
+              Pastas
+            </Link>
+            <Link to="/?cat=carnes" className="footer-link">
+              Carnes
+            </Link>
+            <Link to="/?cat=pescados" className="footer-link">
+              Pescados
+            </Link>
+            <Link to="/?cat=vegetarianas" className="footer-link">
+              Vegetarianas
+            </Link>
+            <Link to="/?cat=veganas" className="footer-link">
+              Veganas
             </Link>
           </div>
         </div>
