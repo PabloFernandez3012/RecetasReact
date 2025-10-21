@@ -1,6 +1,7 @@
 import { Link, Route, Routes } from 'react-router-dom'
 import MegaMenu from './components/MegaMenu'
 import ThemeToggle from './components/ThemeToggle'
+import Footer from './components/Footer'
 import RecipeList from './pages/RecipeList'
 import RecipeDetail from './pages/RecipeDetail'
 import RecipeForm from './pages/RecipeForm'
@@ -25,9 +26,7 @@ export default function App() {
           <Route path="/edit/:id" element={<RecipeForm />} />
         </Routes>
       </main>
-      <footer>
-        <small>Hecho con React + Vite</small>
-      </footer>
+      <Footer />
     </div>
   )
 }
