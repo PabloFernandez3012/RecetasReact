@@ -1,16 +1,36 @@
 import { Link } from 'react-router-dom'
 
+// Categorías alineadas con RecipeForm y MegaMenu
 const CATEGORIES = [
-  { key: 'saladas', label: 'Comida Salada' },
-  { key: 'postres', label: 'Postres' },
-  { key: 'bebidas', label: 'Bebidas' },
+  // Comidas saladas
+  { key: 'saladas', label: 'Comidas saladas' },
   { key: 'ensaladas', label: 'Ensaladas' },
-  { key: 'sopas', label: 'Sopas' },
   { key: 'pastas', label: 'Pastas' },
-  { key: 'carnes', label: 'Carnes' },
-  { key: 'pescados', label: 'Pescados' },
-  { key: 'vegetarianas', label: 'Vegetarianas' },
-  { key: 'veganas', label: 'Veganas' },
+  { key: 'tortillas', label: 'Tortillas' },
+  { key: 'sopas', label: 'Sopas' },
+  { key: 'arroces', label: 'Arroces' },
+
+  // Momentos del día
+  { key: 'desayuno', label: 'Desayuno' },
+  { key: 'almuerzo', label: 'Almuerzo' },
+  { key: 'merienda', label: 'Merienda' },
+  { key: 'cena', label: 'Cena' },
+
+  // Postres
+  { key: 'postres', label: 'Postres' },
+  { key: 'tortas', label: 'Tortas' },
+  { key: 'galletas', label: 'Galletas' },
+  { key: 'helados', label: 'Helados' },
+
+  // Bebidas
+  { key: 'bebidas-sin', label: 'Bebidas sin alcohol' },
+  { key: 'bebidas-con', label: 'Bebidas con alcohol' },
+
+  // Celebraciones
+  { key: 'cumpleanos', label: 'Cumpleaños' },
+  { key: 'navidad', label: 'Navidad' },
+  { key: 'ano-nuevo', label: 'Año nuevo' },
+  { key: 'dia-independencia', label: 'Día de la independencia' },
 ]
 
 export default function Footer() {
