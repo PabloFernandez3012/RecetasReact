@@ -9,6 +9,10 @@ const CATEGORIES = [
   { key: 'tortillas', label: 'Tortillas' },
   { key: 'sopas', label: 'Sopas' },
   { key: 'arroces', label: 'Arroces' },
+  { key: 'carnes', label: 'Carnes' },
+  { key: 'pescados', label: 'Pescados' },
+  { key: 'vegetarianas', label: 'Vegetarianas' },
+  { key: 'veganas', label: 'Veganas' },
 
   // Momentos del día
   { key: 'desayuno', label: 'Desayuno' },
