@@ -28,7 +28,7 @@ const CATEGORIES = [
 
   // Bebidas
   { key: 'bebidas-sin', label: 'Bebidas sin alcohol' },
-  { key: 'bebidas-con', label: 'Bebidas con alcohol' },
+  { key: 'bebidas-con', label: 'Bebidas alcohólicas' },
 
   // Celebraciones
   { key: 'cumpleanos', label: 'Cumpleaños' },
