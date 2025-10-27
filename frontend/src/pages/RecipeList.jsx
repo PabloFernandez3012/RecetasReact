@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
+import Card from '../components/ui/Card'
 import { apiUrl } from '../lib/api'
 
 export default function RecipeList() {
@@ -44,7 +45,7 @@ export default function RecipeList() {
   return (
     <div className="list">
       {filtered.map(r => (
-        <article key={r.id} className="card">
+        <Card key={r.id} as="article">
           {r.image ? <img src={r.image} alt={r.title} /> : null}
           <h3><Link to={`/recipe/${r.id}`}>{r.title}</Link></h3>
           <p>{r.description}</p>
@@ -56,7 +57,7 @@ export default function RecipeList() {
           <div className="actions">
             <Link className="btn" to={`/edit/${r.id}`}>Editar</Link>
           </div>
-        </article>
+        </Card>
       ))}
       {filtered.length === 0 && <p>No hay recetas que coincidan con el filtro.</p>}
     </div>

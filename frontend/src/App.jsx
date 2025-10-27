@@ -2,13 +2,14 @@ import { Link, Route, Routes } from 'react-router-dom'
 import MegaMenu from './components/MegaMenu'
 import ThemeToggle from './components/ThemeToggle'
 import Footer from './components/Footer'
+import Container from './components/ui/Container'
 import RecipeList from './pages/RecipeList'
 import RecipeDetail from './pages/RecipeDetail'
 import RecipeForm from './pages/RecipeForm'
 
 export default function App() {
   return (
-    <div className="container">
+    <Container>
       <header>
         <h1><Link to="/">Recetas de Pablo</Link></h1>
         <ThemeToggle />
@@ -27,6 +28,6 @@ export default function App() {
         </Routes>
       </main>
       <Footer />
-    </div>
+    </Container>
   )
 }
