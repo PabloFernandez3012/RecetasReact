@@ -20,6 +20,7 @@ Aplicación de recetas con frontend en React y backend en Node.js/Express. Permi
 
 - [Características](#características)
 - [Tecnologías](#tecnologías)
+- [Gestión de estado con useState](#gestión-de-estado-con-usestate)
 - [Requisitos](#requisitos)
 - [Estructura del proyecto](#estructura-del-proyecto)
 - [Desarrollo local](#desarrollo-local)
@@ -60,6 +61,56 @@ Aplicación de recetas con frontend en React y backend en Node.js/Express. Permi
 ### Herramientas
 - concurrently
 - nodemon
+
+---
+
+## Gestión de estado con useState
+
+El proyecto utiliza el hook `useState` de React para manejar el estado local en los componentes. A continuación se detallan los casos de uso:
+
+### 📄 RecipeList.jsx (Lista de recetas)
+```javascript
+const [recipes, setRecipes] = useState([])      // Almacena el array de recetas
+const [loading, setLoading] = useState(true)    // Controla el estado de carga
+```
+- **Propósito:** Gestionar la lista completa de recetas obtenidas del backend y el estado de carga durante el fetch.
+
+### 📖 RecipeDetail.jsx (Detalle de receta)
+```javascript
+const [recipe, setRecipe] = useState(null)      // Almacena los datos de una receta
+const [loading, setLoading] = useState(true)    // Estado de carga
+const [error, setError] = useState('')          // Manejo de errores
+```
+- **Propósito:** Gestionar los detalles de una receta específica, el estado de carga y posibles errores en la petición.
+
+### ✏️ RecipeForm.jsx (Formulario de recetas)
+```javascript
+const [data, setData] = useState(empty)         // Datos del formulario
+const [loading, setLoading] = useState(false)   // Estado durante el envío
+```
+- **Propósito:** Controlar los campos del formulario (título, ingredientes, pasos, etc.) y el estado de envío al guardar.
+
+### 🍔 MegaMenu.jsx (Menú de navegación)
+```javascript
+const [open, setOpen] = useState(false)         // Estado del menú (abierto/cerrado)
+```
+- **Propósito:** Alternar la visibilidad del menú desplegable en dispositivos móviles.
+
+### 🌓 ThemeToggle.jsx (Selector de tema)
+```javascript
+const [isDark, setIsDark] = useState(() => {
+  return localStorage.getItem('theme') === 'dark'
+})
+```
+- **Propósito:** Mantener y sincronizar el tema (claro/oscuro) con localStorage para persistencia entre sesiones.
+
+### Patrón de uso
+
+El proyecto sigue el patrón tradicional de React con `useState` + `useEffect` para:
+- Fetching de datos desde la API REST
+- Gestión de estados de UI (loading, errores)
+- Manejo de formularios controlados
+- Interacciones del usuario (menús, temas)
 
 ---
 
@@ -214,4 +265,4 @@ node src/scripts/import-recipes.js C:\\ruta\\a\\mis-recetas.json
 
 ## Licencia
 
-Este proyecto es de c�digo abierto bajo licencia MIT.
+Este proyecto es de c�digo abierto bajo licencia MIT.
