@@ -12,7 +12,7 @@ Aplicación de recetas con frontend en React y backend en Node.js/Express. Permi
 
 ## Etiquetas
 
-`react` `vite` `node` `express` `sqlite` `recetas` `crud` `vercel` `render` `railway`
+`react` `vite` `node` `express` `sqlite` `recetas` `crud` `react-query` `tanstack-query` `custom-hooks` `vercel` `render` `railway`
 
 ---
 
@@ -20,7 +20,7 @@ Aplicación de recetas con frontend en React y backend en Node.js/Express. Permi
 
 - [Características](#características)
 - [Tecnologías](#tecnologías)
-- [Gestión de estado con useState](#gestión-de-estado-con-usestate)
+- [Gestión de datos con React Query](#gestión-de-datos-con-react-query)
 - [Requisitos](#requisitos)
 - [Estructura del proyecto](#estructura-del-proyecto)
 - [Desarrollo local](#desarrollo-local)
@@ -35,11 +35,14 @@ Aplicación de recetas con frontend en React y backend en Node.js/Express. Permi
 ## Características
 
 - **CRUD completo** de recetas (título, descripción, ingredientes, pasos, imagen, categorías)
+- **React Query** para gestión de estado del servidor con caché, sincronización automática y estados de UI
 - **Filtro por categorías** y búsqueda por texto en títulos, descripciones, ingredientes y pasos
+- **Estados de UI profesionales**: Loading, Error y Empty states en todas las vistas
 - **Menú MegaMenu** con categorías y pie de página con enlaces rápidos
 - **Tema claro/oscuro** con selector y persistencia en localStorage
 - **Frontend desacoplado** del backend mediante `VITE_API_BASE`
 - **Persistencia con SQLite** mediante `better-sqlite3`, migración inicial desde JSON y script de importación
+- **Custom hooks** para reutilización de lógica de fetching y mutations
 
 ---
 
@@ -49,6 +52,7 @@ Aplicación de recetas con frontend en React y backend en Node.js/Express. Permi
 - React 18
 - Vite
 - React Router
+- **TanStack Query** (React Query) - Gestión de estado del servidor
 - SCSS
 
 ### Backend
@@ -64,53 +68,80 @@ Aplicación de recetas con frontend en React y backend en Node.js/Express. Permi
 
 ---
 
-## Gestión de estado con useState
+## Gestión de datos con React Query
 
-El proyecto utiliza el hook `useState` de React para manejar el estado local en los componentes. A continuación se detallan los casos de uso:
+El proyecto utiliza **TanStack Query (React Query)** para la gestión profesional de datos del servidor, eliminando la necesidad de gestionar manualmente estados de loading, errores y caché.
 
-### 📄 RecipeList.jsx (Lista de recetas)
+### 🎯 Ventajas implementadas
+
+- ✅ **Caché automático**: Los datos se cachean y reutilizan entre componentes
+- ✅ **Sincronización**: Actualización automática tras mutaciones (crear, editar, eliminar)
+- ✅ **Estados de UI**: Loading, error y empty states en todas las vistas
+- ✅ **Optimización**: Reducción de peticiones innecesarias al servidor
+- ✅ **Devtools**: Herramientas de desarrollo para inspeccionar queries
+
+### � Estructura de hooks personalizados
+
+**`frontend/src/hooks/useRecipes.js`** - Custom hooks con React Query:
+
 ```javascript
-const [recipes, setRecipes] = useState([])      // Almacena el array de recetas
-const [loading, setLoading] = useState(true)    // Controla el estado de carga
+// Queries (Lecturas)
+useRecipes()          // Obtiene todas las recetas
+useRecipe(id)         // Obtiene una receta específica
+
+// Mutations (Escrituras)
+useCreateRecipe()     // Crea una nueva receta
+useUpdateRecipe()     // Actualiza una receta existente
+useDeleteRecipe()     // Elimina una receta
 ```
-- **Propósito:** Gestionar la lista completa de recetas obtenidas del backend y el estado de carga durante el fetch.
 
-### 📖 RecipeDetail.jsx (Detalle de receta)
+### 🔄 Ejemplo de uso
+
+**RecipeList.jsx** - Lista con estados de UI:
 ```javascript
-const [recipe, setRecipe] = useState(null)      // Almacena los datos de una receta
-const [loading, setLoading] = useState(true)    // Estado de carga
-const [error, setError] = useState('')          // Manejo de errores
+const { data: recipes, isLoading, isError, error } = useRecipes()
+
+if (isLoading) return <LoadingState />
+if (isError) return <ErrorState message={error.message} />
+if (recipes.length === 0) return <EmptyState />
+
+return <RecipeCards recipes={recipes} />
 ```
-- **Propósito:** Gestionar los detalles de una receta específica, el estado de carga y posibles errores en la petición.
 
-### ✏️ RecipeForm.jsx (Formulario de recetas)
+**RecipeForm.jsx** - Crear/editar con mutations:
 ```javascript
-const [data, setData] = useState(empty)         // Datos del formulario
-const [loading, setLoading] = useState(false)   // Estado durante el envío
+const createMutation = useCreateRecipe()
+const updateMutation = useUpdateRecipe()
+
+const onSubmit = async (data) => {
+  await createMutation.mutateAsync(data)
+  // La lista se actualiza automáticamente gracias a invalidateQueries
+}
 ```
-- **Propósito:** Controlar los campos del formulario (título, ingredientes, pasos, etc.) y el estado de envío al guardar.
 
-### 🍔 MegaMenu.jsx (Menú de navegación)
-```javascript
-const [open, setOpen] = useState(false)         // Estado del menú (abierto/cerrado)
-```
-- **Propósito:** Alternar la visibilidad del menú desplegable en dispositivos móviles.
+### 🎨 Estados de UI implementados
 
-### 🌓 ThemeToggle.jsx (Selector de tema)
+| Estado | Cuándo se muestra | Componentes |
+|--------|------------------|-------------|
+| **Loading** | Mientras carga datos del servidor | RecipeList, RecipeDetail, RecipeForm (edit) |
+| **Error** | Si falla la petición HTTP | Todos los componentes con queries |
+| **Empty** | Cuando no hay datos que mostrar | RecipeList (sin recetas o filtro vacío) |
+| **Saving** | Durante mutations (crear/editar/eliminar) | RecipeForm, RecipeDetail |
+
+### ⚙️ Configuración
+
+**`frontend/src/lib/queryClient.js`**:
 ```javascript
-const [isDark, setIsDark] = useState(() => {
-  return localStorage.getItem('theme') === 'dark'
+export const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 1000 * 60 * 5,  // 5 minutos
+      refetchOnWindowFocus: false,
+      retry: 1,
+    },
+  },
 })
 ```
-- **Propósito:** Mantener y sincronizar el tema (claro/oscuro) con localStorage para persistencia entre sesiones.
-
-### Patrón de uso
-
-El proyecto sigue el patrón tradicional de React con `useState` + `useEffect` para:
-- Fetching de datos desde la API REST
-- Gestión de estados de UI (loading, errores)
-- Manejo de formularios controlados
-- Interacciones del usuario (menús, temas)
 
 ---
 
