@@ -1,36 +1,57 @@
-import { useEffect, useState } from 'react'
 import { Link, useParams, useNavigate } from 'react-router-dom'
-import { apiUrl } from '../lib/api'
+import { useRecipe, useDeleteRecipe } from '../hooks/useRecipes'
 
 export default function RecipeDetail() {
   const { id } = useParams()
   const navigate = useNavigate()
-  const [recipe, setRecipe] = useState(null)
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState('')
-
-  useEffect(() => {
-    fetch(apiUrl(`/api/recipes/${id}`))
-      .then(async r => {
-        if (!r.ok) throw new Error('No encontrado')
-        return r.json()
-      })
-      .then(setRecipe)
-      .catch(e => setError(String(e)))
-      .finally(() => setLoading(false))
-  }, [id])
+  const { data: recipe, isLoading, isError, error } = useRecipe(id)
+  const deleteMutation = useDeleteRecipe()
 
   const onDelete = async () => {
     if (!confirm('¿Eliminar receta?')) return
-    const r = await fetch(apiUrl(`/api/recipes/${id}`), { method: 'DELETE' })
-    if (r.status === 204) {
+    
+    try {
+      await deleteMutation.mutateAsync(id)
       navigate('/')
+    } catch (err) {
+      alert('Error al eliminar: ' + err.message)
     }
   }
 
-  if (loading) return <p>Cargando...</p>
-  if (error) return <p>Error: {error}</p>
-  if (!recipe) return <p>No encontrada</p>
+  // Estado de Loading
+  if (isLoading) {
+    return (
+      <div className="loading-state" style={{ textAlign: 'center', padding: '2rem' }}>
+        <p style={{ fontSize: '1.2rem' }}>⏳ Cargando receta...</p>
+      </div>
+    )
+  }
+
+  // Estado de Error
+  if (isError) {
+    return (
+      <div className="error-state" style={{ textAlign: 'center', padding: '2rem', color: 'red' }}>
+        <h2>❌ Error al cargar la receta</h2>
+        <p>{error?.message || 'Ocurrió un error desconocido'}</p>
+        <Link to="/" className="btn" style={{ marginTop: '1rem' }}>
+          ← Volver al inicio
+        </Link>
+      </div>
+    )
+  }
+
+  // Estado Empty (no encontrada)
+  if (!recipe) {
+    return (
+      <div className="empty-state" style={{ textAlign: 'center', padding: '2rem' }}>
+        <h2>🔍 Receta no encontrada</h2>
+        <p>La receta que buscas no existe.</p>
+        <Link to="/" className="btn" style={{ marginTop: '1rem' }}>
+          ← Volver al inicio
+        </Link>
+      </div>
+    )
+  }
 
   return (
     <article>
@@ -52,7 +73,13 @@ export default function RecipeDetail() {
       </ol>
       <div className="actions">
         <Link className="btn" to={`/edit/${recipe.id}`}>Editar</Link>
-        <button className="btn danger" onClick={onDelete}>Eliminar</button>
+        <button 
+          className="btn danger" 
+          onClick={onDelete}
+          disabled={deleteMutation.isPending}
+        >
+          {deleteMutation.isPending ? '⏳ Eliminando...' : 'Eliminar'}
+        </button>
       </div>
     </article>
   )

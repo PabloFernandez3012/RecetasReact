@@ -1,22 +1,14 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useMemo } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import Card from '../components/ui/Card'
-import { apiUrl } from '../lib/api'
+import { useRecipes } from '../hooks/useRecipes'
 
 export default function RecipeList() {
-  const [recipes, setRecipes] = useState([])
-  const [loading, setLoading] = useState(true)
+  const { data: recipes = [], isLoading, isError, error } = useRecipes()
   const [sp] = useSearchParams()
   const catRaw = sp.get('cat') || 'todas'
   const catList = catRaw === 'todas' ? [] : catRaw.split(',').filter(Boolean)
   const q = (sp.get('q') || '').toLowerCase()
-
-  useEffect(() => {
-    fetch(apiUrl('/api/recipes'))
-      .then(r => r.json())
-      .then(setRecipes)
-      .finally(() => setLoading(false))
-  }, [])
 
   const filtered = useMemo(() => {
     let out = recipes
@@ -40,7 +32,43 @@ export default function RecipeList() {
     return out
   }, [recipes, catList, q])
 
-  if (loading) return <p>Cargando...</p>
+  // Estado de Loading
+  if (isLoading) {
+    return (
+      <div className="loading-state" style={{ textAlign: 'center', padding: '2rem' }}>
+        <p style={{ fontSize: '1.2rem' }}>⏳ Cargando recetas...</p>
+      </div>
+    )
+  }
+
+  // Estado de Error
+  if (isError) {
+    return (
+      <div className="error-state" style={{ textAlign: 'center', padding: '2rem', color: 'red' }}>
+        <h2>❌ Error al cargar las recetas</h2>
+        <p>{error?.message || 'Ocurrió un error desconocido'}</p>
+      </div>
+    )
+  }
+
+  // Estado Empty (sin resultados)
+  if (filtered.length === 0) {
+    return (
+      <div className="empty-state" style={{ textAlign: 'center', padding: '2rem' }}>
+        <h2>🍽️ No hay recetas disponibles</h2>
+        <p>
+          {recipes.length === 0 
+            ? 'Aún no has creado ninguna receta.' 
+            : 'No hay recetas que coincidan con tu búsqueda o filtro.'}
+        </p>
+        {recipes.length === 0 && (
+          <Link to="/new" className="btn" style={{ marginTop: '1rem' }}>
+            ➕ Crear primera receta
+          </Link>
+        )}
+      </div>
+    )
+  }
 
   return (
     <div className="list">
@@ -59,7 +87,6 @@ export default function RecipeList() {
           </div>
         </Card>
       ))}
-      {filtered.length === 0 && <p>No hay recetas que coincidan con el filtro.</p>}
     </div>
   )
 }

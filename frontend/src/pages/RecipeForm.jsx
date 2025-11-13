@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
-import { apiUrl } from '../lib/api'
+import { useRecipe, useCreateRecipe, useUpdateRecipe } from '../hooks/useRecipes'
 
 const empty = { title: '', description: '', ingredients: [''], steps: [''], image: '', category: [] }
 
@@ -57,24 +57,26 @@ export default function RecipeForm() {
   const { id } = useParams()
   const isEdit = Boolean(id)
   const [data, setData] = useState(empty)
-  const [loading, setLoading] = useState(false)
 
+  // Hooks de React Query
+  const { data: recipe, isLoading: loadingRecipe } = useRecipe(id)
+  const createMutation = useCreateRecipe()
+  const updateMutation = useUpdateRecipe()
+
+  // Cargar datos si es edición
   useEffect(() => {
-    if (isEdit) {
-      setLoading(true)
-  fetch(apiUrl(`/api/recipes/${id}`)).then(r => r.json()).then(r => {
-        const cats = Array.isArray(r.category) ? r.category : (r.category ? [r.category] : [])
-        setData({
-          title: r.title || '',
-          description: r.description || '',
-          ingredients: r.ingredients?.length ? r.ingredients : [''],
-          steps: r.steps?.length ? r.steps : [''],
-          image: r.image || '',
-          category: cats
-        })
-      }).finally(() => setLoading(false))
+    if (isEdit && recipe) {
+      const cats = Array.isArray(recipe.category) ? recipe.category : (recipe.category ? [recipe.category] : [])
+      setData({
+        title: recipe.title || '',
+        description: recipe.description || '',
+        ingredients: recipe.ingredients?.length ? recipe.ingredients : [''],
+        steps: recipe.steps?.length ? recipe.steps : [''],
+        image: recipe.image || '',
+        category: cats
+      })
     }
-  }, [id, isEdit])
+  }, [isEdit, recipe])
 
   const toggleCategory = (cat) => {
     setData(d => {
@@ -100,28 +102,50 @@ export default function RecipeForm() {
 
   const onSubmit = async (e) => {
     e.preventDefault()
-    setLoading(true)
-    const method = isEdit ? 'PUT' : 'POST'
-  const url = isEdit ? apiUrl(`/api/recipes/${id}`) : apiUrl('/api/recipes')
-    const r = await fetch(url, {
-      method,
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        title: data.title,
-        description: data.description,
-        ingredients: data.ingredients.filter(Boolean),
-        steps: data.steps.filter(Boolean),
-        image: data.image,
-        category: data.category
-      })
-    })
-    setLoading(false)
-    if (r.ok) navigate('/')
+
+    const recipeData = {
+      title: data.title,
+      description: data.description,
+      ingredients: data.ingredients.filter(Boolean),
+      steps: data.steps.filter(Boolean),
+      image: data.image,
+      category: data.category
+    }
+
+    try {
+      if (isEdit) {
+        await updateMutation.mutateAsync({ id, data: recipeData })
+      } else {
+        await createMutation.mutateAsync(recipeData)
+      }
+      navigate('/')
+    } catch (error) {
+      alert('Error al guardar: ' + error.message)
+    }
   }
+
+  // Estado de carga al cargar receta para editar
+  if (isEdit && loadingRecipe) {
+    return (
+      <div className="loading-state" style={{ textAlign: 'center', padding: '2rem' }}>
+        <p style={{ fontSize: '1.2rem' }}>⏳ Cargando receta...</p>
+      </div>
+    )
+  }
+
+  const isSaving = createMutation.isPending || updateMutation.isPending
+  const hasError = createMutation.isError || updateMutation.isError
 
   return (
     <form className="form" onSubmit={onSubmit}>
       <h2>{isEdit ? 'Editar Receta' : 'Nueva Receta'}</h2>
+      
+      {hasError && (
+        <div style={{ padding: '1rem', background: '#fee', color: 'red', borderRadius: '4px', marginBottom: '1rem' }}>
+          ❌ Error al guardar la receta. Por favor intenta nuevamente.
+        </div>
+      )}
+
       <label>
         Título
         <input value={data.title} onChange={e => updateField('title', e.target.value)} required />
@@ -179,7 +203,9 @@ export default function RecipeForm() {
         <button type="button" onClick={() => addArrayItem('steps')} className="btn">Añadir paso</button>
       </fieldset>
       <div className="actions">
-        <button className="btn" disabled={loading} type="submit">{loading ? 'Guardando...' : 'Guardar'}</button>
+        <button className="btn" disabled={isSaving} type="submit">
+          {isSaving ? '⏳ Guardando...' : 'Guardar'}
+        </button>
       </div>
     </form>
   )
