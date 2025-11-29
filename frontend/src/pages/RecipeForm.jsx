@@ -13,7 +13,11 @@ const categoryGroups = [
       { value: 'pastas', label: 'Pastas' },
       { value: 'tortillas', label: 'Tortillas' },
       { value: 'sopas', label: 'Sopas' },
-      { value: 'arroces', label: 'Arroces' }
+      { value: 'arroces', label: 'Arroces' },
+      { value: 'carnes', label: 'Carnes' },
+      { value: 'pescados', label: 'Pescados' },
+      { value: 'vegetarianas', label: 'Vegetarianos' },
+      { value: 'veganas', label: 'Vegano' }
     ]
   },
   {
