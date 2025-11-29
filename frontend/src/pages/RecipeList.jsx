@@ -2,9 +2,18 @@ import { useMemo } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import Card from '../components/ui/Card'
 import { useRecipes } from '../hooks/useRecipes'
+import { useFavorites, useLikeRecipe, useUnlikeRecipe } from '../hooks/useFavorites'
+import { useMe } from '../hooks/useAuth'
 
 export default function RecipeList() {
   const { data: recipes = [], isLoading, isError, error } = useRecipes()
+  const hasToken = Boolean(localStorage.getItem('auth_token'))
+  const { data: me } = useMe(hasToken)
+  const { data: favorites } = useFavorites(hasToken)
+  const likeMutation = useLikeRecipe()
+  const unlikeMutation = useUnlikeRecipe()
+  const favIds = Array.isArray(favorites) ? favorites.map(r => r.id) : []
+  
   const [sp] = useSearchParams()
   const catRaw = sp.get('cat') || 'todas'
   const catList = catRaw === 'todas' ? [] : catRaw.split(',').filter(Boolean)
@@ -72,21 +81,41 @@ export default function RecipeList() {
 
   return (
     <div className="list">
-      {filtered.map(r => (
-        <Card key={r.id} as="article">
-          {r.image ? <img src={r.image} alt={r.title} /> : null}
-          <h3><Link to={`/recipe/${r.id}`}>{r.title}</Link></h3>
-          <p>{r.description}</p>
-          <div>
-            {(Array.isArray(r.category) ? r.category : [r.category]).map((cat, i) => (
-              <span key={cat} className="badge" style={{marginRight:4}}>{cat}</span>
-            ))}
-          </div>
-          <div className="actions">
-            <Link className="btn" to={`/edit/${r.id}`}>Editar</Link>
-          </div>
-        </Card>
-      ))}
+      {filtered.map(r => {
+        const isFav = favIds.includes(r.id)
+        return (
+          <Card key={r.id} as="article">
+            {r.image ? <img src={r.image} alt={r.title} /> : null}
+            <h3><Link to={`/recipe/${r.id}`}>{r.title}</Link></h3>
+            <p>{r.description}</p>
+            <div>
+              {(Array.isArray(r.category) ? r.category : [r.category]).map((cat, i) => (
+                <span key={cat} className="badge" style={{marginRight:4}}>{cat}</span>
+              ))}
+            </div>
+            <div className="actions">
+              {me?.role === 'admin' ? (
+                <Link className="btn" to={`/edit/${r.id}`}>Editar</Link>
+              ) : me ? (
+                <button
+                  className="btn"
+                  onClick={() => {
+                    if (isFav) {
+                      unlikeMutation.mutate(r.id)
+                    } else {
+                      likeMutation.mutate(r.id)
+                    }
+                  }}
+                  disabled={likeMutation.isPending || unlikeMutation.isPending}
+                  title={isFav ? 'Quitar de favoritos' : 'Agregar a favoritos'}
+                >
+                  {isFav ? '★ Favorito' : '☆ Favorito'}
+                </button>
+              ) : null}
+            </div>
+          </Card>
+        )
+      })}
     </div>
   )
 }
