@@ -181,16 +181,6 @@ const onSubmit = async (data) => {
 
 El sistema soporta roles:
 
-### 🔑 Credenciales de prueba
-
-**Superusuario (admin):**
-- Email: `pablo@pablo.com`
-- Contraseña: `123456`
-
-Este usuario tiene permisos completos para crear, editar y eliminar recetas.
-
----
-
 ### Asignación de roles
 
 Asignación inicial de admin:
@@ -217,6 +207,37 @@ export const queryClient = new QueryClient({
   },
 })
 ```
+
+---
+
+### Crear un superusuario
+
+Tienes dos formas de crear el primer usuario administrador:
+
+- **Opción A — Por variable de entorno (automático al registrarse):**
+  Define `ADMIN_EMAILS` con una lista de correos (separados por comas). Cualquier usuario que se registre con uno de esos correos será admin.
+
+  ```powershell
+  # En desarrollo local
+  $env:ADMIN_EMAILS = "admin@ejemplo.com,otro@ejemplo.com"; npm run dev -w backend
+  ```
+
+- **Opción B — Promoción manual (post-registro):**
+  Promueve una cuenta existente a admin.
+
+  1) Vía API (requiere estar autenticado como admin existente):
+  ```powershell
+  $token = "<TOKEN_ADMIN>"
+  Invoke-RestMethod -Method POST -Uri "http://localhost:3001/api/users/<USER_ID>/promote" -Headers @{Authorization="Bearer $token"}
+  ```
+
+  2) Vía consola (actualizando la base de datos SQLite directamente):
+  ```powershell
+  cd backend
+  node -e "const Database = require('better-sqlite3'); const db = new Database('./src/data/recipes.db'); db.prepare('UPDATE users SET role=? WHERE email=?').run('admin','tu-email@ejemplo.com'); console.log('Usuario promovido a admin'); db.close();"
+  ```
+
+Nota: En producción (Railway/Render) asegúrate de configurar `JWT_SECRET` y, si usas la opción A, `ADMIN_EMAILS` en el servicio del backend.
 
 ---
 
