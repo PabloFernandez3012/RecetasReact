@@ -91,6 +91,7 @@ El proyecto incluye autenticación basada en **JSON Web Tokens (JWT)** para prot
 ```json
 {
   "id": "string",
+  "name": "string",
   "email": "string",
   "createdAt": "ISO-8601"
 }

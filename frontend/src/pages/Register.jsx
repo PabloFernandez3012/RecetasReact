@@ -3,6 +3,7 @@ import { useRegister } from '../hooks/useAuth'
 import { useNavigate, Link } from 'react-router-dom'
 
 export default function Register() {
+  const [name, setName] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const registerMutation = useRegister()
@@ -11,7 +12,7 @@ export default function Register() {
   const onSubmit = async (e) => {
     e.preventDefault()
     try {
-      await registerMutation.mutateAsync({ email, password })
+      await registerMutation.mutateAsync({ email, password, name })
       navigate('/')
     } catch (err) {
       // handled in UI
@@ -24,6 +25,9 @@ export default function Register() {
       {registerMutation.isError && (
         <p style={{ color: 'red' }}>Error: {registerMutation.error.message}</p>
       )}
+      <label>Nombre
+        <input type="text" value={name} onChange={e => setName(e.target.value)} placeholder="Tu nombre" required />
+      </label>
       <label>Email
         <input type="email" value={email} onChange={e => setEmail(e.target.value)} required />
       </label>

@@ -27,7 +27,7 @@ export default function App() {
           <div style={{flexGrow:1}} />
           {isSuccess ? (
             <>
-              <span style={{fontSize:'0.9rem'}}>Hola, {me.email}</span>
+              <span style={{fontSize:'0.9rem'}}>Hola, {me.name || me.email}</span>
               <Link to="/new" className="btn icon" title="Nueva receta" aria-label="Nueva receta">+</Link>
               <button onClick={onLogout} className="btn" style={{background:'#444'}}>Salir</button>
             </>
