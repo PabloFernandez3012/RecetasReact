@@ -48,6 +48,10 @@ db.exec(`
     FOREIGN KEY (userId) REFERENCES users(id) ON DELETE CASCADE,
     FOREIGN KEY (recipeId) REFERENCES recipes(id) ON DELETE CASCADE
   );
+  -- Índices para mejorar rendimiento en listados y favoritos
+  CREATE INDEX IF NOT EXISTS idx_recipes_createdAt ON recipes (createdAt);
+  CREATE INDEX IF NOT EXISTS idx_favorites_user ON favorites (userId);
+  CREATE INDEX IF NOT EXISTS idx_favorites_recipe ON favorites (recipeId);
 `)
 
 function mapRow(row) {
@@ -69,6 +73,19 @@ export function getAllRecipes() {
   const stmt = db.prepare('SELECT * FROM recipes ORDER BY datetime(createdAt) DESC')
   const rows = stmt.all()
   return rows.map(mapRow)
+}
+
+export function getAllRecipesSummary() {
+  const stmt = db.prepare('SELECT id, title, description, image, category, createdAt FROM recipes ORDER BY datetime(createdAt) DESC')
+  const rows = stmt.all()
+  return rows.map(r => ({
+    id: r.id,
+    title: r.title,
+    description: r.description,
+    image: r.image,
+    category: JSON.parse(r.category || '[]'),
+    createdAt: r.createdAt,
+  }))
 }
 
 export function getRecipe(id) {

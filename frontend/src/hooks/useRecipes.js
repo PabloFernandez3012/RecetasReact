@@ -15,7 +15,7 @@ export function useRecipes() {
   return useQuery({
     queryKey: ['recipes'],
     queryFn: async () => {
-      const response = await fetch(apiUrl('/api/recipes'))
+      const response = await fetch(apiUrl('/api/recipes-summary'))
       if (!response.ok) {
         throw new Error('Error al cargar las recetas')
       }

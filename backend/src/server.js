@@ -1,10 +1,11 @@
 import express from 'express';
 import cors from 'cors';
+import compression from 'compression';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
 import { promises as fs } from 'fs';
 import { nanoid } from 'nanoid';
-import { getAllRecipes, getRecipe, createRecipe, updateRecipe, deleteRecipe, migrateFromJsonIfEmpty, paths, addFavorite, removeFavorite, getFavorites, getFavoriteIds } from './db.js';
+import { getAllRecipes, getAllRecipesSummary, getRecipe, createRecipe, updateRecipe, deleteRecipe, migrateFromJsonIfEmpty, paths, addFavorite, removeFavorite, getFavorites, getFavoriteIds } from './db.js';
 import { registerUser, loginUser, authMiddleware, getMe, updateProfile, isAdmin } from './auth.js';
 import net from 'net';
 
@@ -13,6 +14,7 @@ const __dirname = dirname(__filename);
 const dataPath = join(__dirname, 'data', 'recipes.json');
 
 const app = express();
+app.use(compression());
 app.use(cors());
 app.use(express.json());
 
@@ -110,6 +112,18 @@ app.get('/api/recipes', async (_req, res) => {
     res.json(recipes);
   } catch (err) {
     res.status(500).json({ error: 'Error leyendo recetas', details: String(err) });
+  }
+});
+
+// Endpoint resumido para listar más rápido (sin ingredientes ni pasos)
+app.get('/api/recipes-summary', async (_req, res) => {
+  try {
+    const items = getAllRecipesSummary();
+    // Cache-Control para navegadores/CDN
+    res.set('Cache-Control', 'public, max-age=60');
+    res.json(items);
+  } catch (err) {
+    res.status(500).json({ error: 'Error leyendo listado', details: String(err) });
   }
 });
 
