@@ -6,6 +6,7 @@ import { promises as fs } from 'fs';
 import { nanoid } from 'nanoid';
 import { getAllRecipes, getRecipe, createRecipe, updateRecipe, deleteRecipe, migrateFromJsonIfEmpty, paths } from './db.js';
 import { registerUser, loginUser, authMiddleware, getMe, updateProfile } from './auth.js';
+import net from 'net';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -164,17 +165,72 @@ app.delete('/api/recipes/:id', authMiddleware, async (req, res) => {
   }
 });
 
-const PORT = process.env.PORT || 3001;
-// Migración inicial desde JSON a SQLite si la tabla está vacía
-migrateFromJsonIfEmpty(dataPath).then((migrated) => {
-  if (migrated > 0) {
-    console.log(`Migradas ${migrated} recetas desde JSON a SQLite. DB: ${paths.dbPath}`);
+const BASE_PORT = Number(process.env.PORT) || 3001;
+let server;
+
+function findAvailablePort(startPort) {
+  return new Promise((resolve) => {
+    const tryPort = (p) => {
+      const tester = net.createServer()
+        .once('error', (err) => {
+          if ((err.code === 'EADDRINUSE' || err.code === 'EACCES') && p < startPort + 10) {
+            // probar siguiente puerto hasta +10 para entorno dev
+            tryPort(p + 1);
+          } else {
+            resolve(startPort); // si falla distinto, usar el base y dejar que falle expresamente
+          }
+        })
+        .once('listening', () => {
+          tester.close(() => resolve(p));
+        })
+        .listen(p, '0.0.0.0');
+    };
+    tryPort(startPort);
+  });
+}
+
+function start(port) {
+  // Migración inicial y luego levantar servidor
+  migrateFromJsonIfEmpty(dataPath).then((migrated) => {
+    if (migrated > 0) {
+      console.log(`Migradas ${migrated} recetas desde JSON a SQLite. DB: ${paths.dbPath}`);
+    }
+    server = app.listen(port, () => {
+      console.log(`API de recetas escuchando en http://localhost:${port}`);
+    });
+    // Manejo cierre limpio para nodemon (SIGUSR2) y otros
+    process.once('SIGUSR2', () => {
+      console.log('Recibido SIGUSR2: cerrando servidor antes de reinicio nodemon...');
+      server.close(() => {
+        process.kill(process.pid, 'SIGUSR2');
+      });
+    });
+    process.once('SIGINT', () => {
+      console.log('SIGINT recibido, cerrando servidor...');
+      server.close(() => process.exit(0));
+    });
+    process.once('SIGTERM', () => {
+      console.log('SIGTERM recibido, cerrando servidor...');
+      server.close(() => process.exit(0));
+    });
+    server.on('error', (err) => {
+      if (err.code === 'EADDRINUSE') {
+        console.error(`Puerto ${port} en uso. Inicie solo una instancia de backend o cambie PORT.`);
+      } else {
+        console.error('Error del servidor:', err);
+      }
+    });
+  }).catch((e) => {
+    console.error('Error durante migración inicial:', e);
+    server = app.listen(port, () => {
+      console.log(`API de recetas escuchando en http://localhost:${port}`);
+    });
+  });
+}
+
+findAvailablePort(BASE_PORT).then((port) => {
+  if (port !== BASE_PORT) {
+    console.warn(`Puerto ${BASE_PORT} ocupado. Usando puerto alternativo ${port}.`);
   }
-  app.listen(PORT, () => {
-    console.log(`API de recetas escuchando en http://localhost:${PORT}`);
-  });
-}).catch(() => {
-  app.listen(PORT, () => {
-    console.log(`API de recetas escuchando en http://localhost:${PORT}`);
-  });
+  start(port);
 });
