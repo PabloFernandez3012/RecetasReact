@@ -61,6 +61,8 @@ export function useMe(enabled = true) {
 
 export function logout() {
   localStorage.removeItem('auth_token')
+  // Limpiar caché del perfil para no seguir mostrando datos tras logout
+  queryClient.removeQueries({ queryKey: ['me'] })
 }
 
 export function useUpdateProfile() {

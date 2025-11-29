@@ -12,7 +12,8 @@ import Register from './pages/Register'
 import { useMe, logout } from './hooks/useAuth'
 
 export default function App() {
-  const { data: me, isSuccess } = useMe(Boolean(localStorage.getItem('auth_token')))
+  const hasToken = Boolean(localStorage.getItem('auth_token'))
+  const { data: me, isSuccess } = useMe(hasToken)
   const navigate = useNavigate()
   const onLogout = () => {
     logout()
@@ -25,11 +26,11 @@ export default function App() {
         <ThemeToggle />
         <nav style={{display:'flex',alignItems:'center',gap:12,flexWrap:'wrap', width:'100%'}}>
           <MegaMenu />
-          {isSuccess && (
+          {hasToken && isSuccess && (
             <Link to="/new" className="btn icon" title="Nueva receta" aria-label="Nueva receta" style={{marginLeft:4}}>+</Link>
           )}
           <div style={{flexGrow:1}} />
-          {isSuccess ? (
+          {hasToken && isSuccess ? (
             <>
               <span style={{fontSize:'0.9rem'}}>Hola, {me.name || me.email}</span>
               <Link to="/profile" className="btn" style={{background:'#333'}}>Editar perfil</Link>
