@@ -24,11 +24,13 @@ export default function App() {
         <ThemeToggle />
         <nav style={{display:'flex',alignItems:'center',gap:12,flexWrap:'wrap', width:'100%'}}>
           <MegaMenu />
+          {isSuccess && (
+            <Link to="/new" className="btn icon" title="Nueva receta" aria-label="Nueva receta" style={{marginLeft:4}}>+</Link>
+          )}
           <div style={{flexGrow:1}} />
           {isSuccess ? (
             <>
               <span style={{fontSize:'0.9rem'}}>Hola, {me.name || me.email}</span>
-              <Link to="/new" className="btn icon" title="Nueva receta" aria-label="Nueva receta">+</Link>
               <button onClick={onLogout} className="btn" style={{background:'#444'}}>Salir</button>
             </>
           ) : (
