@@ -17,7 +17,7 @@ export default function App() {
   const navigate = useNavigate()
   const onLogout = () => {
     logout()
-    navigate('/')
+    navigate('/login')
   }
   return (
     <Container>
