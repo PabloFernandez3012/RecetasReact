@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useSearchParams, Link } from 'react-router-dom'
 
 const MENU = [
@@ -64,14 +64,27 @@ const MENU = [
 export default function MegaMenu() {
   const [sp, setSp] = useSearchParams()
   const [activeTab, setActiveTab] = useState(null)
+  const [dropdownLeft, setDropdownLeft] = useState(0)
+  const [dropdownWidth, setDropdownWidth] = useState(0)
+  const tabsRef = useRef(null)
   const cat = sp.get('cat') || ''
 
   const handleSelect = (key) => {
     setSp({ cat: key })
   }
 
-  const handleTabClick = (key) => {
-    setActiveTab(activeTab === key ? null : key)
+  const handleTabClick = (key, e) => {
+    const willOpen = activeTab !== key
+    setActiveTab(willOpen ? key : null)
+    if (willOpen) {
+      const btn = e.currentTarget
+      const tabsBox = tabsRef.current?.getBoundingClientRect()
+      const btnBox = btn.getBoundingClientRect()
+      if (tabsBox && btnBox) {
+        setDropdownLeft(btnBox.left - tabsBox.left)
+        setDropdownWidth(Math.max(260, Math.min(420, btnBox.width)))
+      }
+    }
   }
 
   useEffect(() => {
@@ -82,12 +95,12 @@ export default function MegaMenu() {
 
   return (
     <div className="tab-menu">
-      <div className="tab-menu-tabs">
+      <div className="tab-menu-tabs" ref={tabsRef}>
         {MENU.map(tab => (
           <button
             key={tab.key}
             className={`tab-menu-tab${activeTab === tab.key ? ' active' : ''}`}
-            onClick={(e) => { e.stopPropagation(); handleTabClick(tab.key) }}
+            onClick={(e) => { e.stopPropagation(); handleTabClick(tab.key, e) }}
           >
             <span className="tab-icon">{tab.icon}</span>
             <span className="tab-label">{tab.label}</span>
@@ -95,7 +108,7 @@ export default function MegaMenu() {
         ))}
       </div>
       {activeTab && (
-        <div className="tab-menu-content" onClick={e => e.stopPropagation()}>
+        <div className="tab-menu-content" style={{ left: dropdownLeft, minWidth: dropdownWidth }} onClick={e => e.stopPropagation()}>
           <div className="tab-menu-items">
             {MENU.find(m => m.key === activeTab)?.subs.map(sub => (
               <button

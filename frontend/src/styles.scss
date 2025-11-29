@@ -499,7 +499,7 @@ legend {
   
   .tab-menu-content {
     position: absolute;
-    left: 0;
+    left: 0; // será sobrescrito por inline style calculado
     top: 100%;
     background: var(--card);
     border: 1px solid var(--card-b);
@@ -508,8 +508,8 @@ legend {
     padding: 12px;
     z-index: 20;
     margin-top: 4px;
-    min-width: 300px;
-    max-width: 500px;
+    min-width: 260px;
+    max-width: 420px;
   }
   
   .tab-menu-items {
