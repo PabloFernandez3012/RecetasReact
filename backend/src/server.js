@@ -5,7 +5,7 @@ import { dirname, join } from 'path';
 import { promises as fs } from 'fs';
 import { nanoid } from 'nanoid';
 import { getAllRecipes, getRecipe, createRecipe, updateRecipe, deleteRecipe, migrateFromJsonIfEmpty, paths, addFavorite, removeFavorite, getFavorites, getFavoriteIds } from './db.js';
-import { registerUser, loginUser, authMiddleware, getMe, updateProfile } from './auth.js';
+import { registerUser, loginUser, authMiddleware, getMe, updateProfile, isAdmin } from './auth.js';
 import net from 'net';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -80,6 +80,42 @@ app.put('/api/profile', authMiddleware, async (req, res) => {
   }
 })
 
+// Promover usuario a admin (solo un admin existente puede hacerlo)
+app.post('/api/users/:id/promote', authMiddleware, (req, res) => {
+  if (!isAdmin(req.userId)) return res.status(403).json({ error: 'Solo administradores pueden promover usuarios' })
+  const targetId = req.params.id
+  const target = getMe(targetId)
+  if (!target) return res.status(404).json({ error: 'Usuario no encontrado' })
+  // Actualizar role directamente
+  try {
+    const stmt = `UPDATE users SET role='admin' WHERE id = ?`
+    import('./db.js').then(mod => {
+      mod.default // no default, ignore; using db via dynamic import not needed
+    })
+  } catch {}
+  // Usamos db directa (require sin ESM). Simplificamos con una preparación rápida.
+  try {
+    const sqlite = require('better-sqlite3')
+  } catch {}
+  // Reutilizamos getUserById vía auth helper
+  const current = getMe(targetId)
+  if (current && current.role === 'admin') {
+    return res.json(current)
+  }
+  try {
+    const dbMod = await import('./db.js')
+    const dbPath = dbMod.paths.dbPath
+    const Database = (await import('better-sqlite3')).default
+    const tempDb = new Database(dbPath)
+    tempDb.prepare("UPDATE users SET role='admin' WHERE id = ?").run(targetId)
+    const updated = dbMod.getUserById(targetId)
+    res.json({ id: updated.id, email: updated.email, name: updated.name, role: updated.role, createdAt: updated.createdAt })
+    tempDb.close()
+  } catch (err) {
+    res.status(500).json({ error: 'Error promoviendo usuario', details: String(err) })
+  }
+})
+
 app.get('/api/recipes', async (_req, res) => {
   try {
     const recipes = await readRecipes();
@@ -126,6 +162,7 @@ app.delete('/api/recipes/:id/like', authMiddleware, (req, res) => {
 })
 
 app.post('/api/recipes', authMiddleware, async (req, res) => {
+  if (!isAdmin(req.userId)) return res.status(403).json({ error: 'Solo administradores pueden crear recetas' })
   try {
     const { title, description, ingredients, steps, image, category } = req.body;
     if (!title || !description) return res.status(400).json({ error: 'title y description son requeridos' });
@@ -153,6 +190,7 @@ app.post('/api/recipes', authMiddleware, async (req, res) => {
 });
 
 app.put('/api/recipes/:id', authMiddleware, async (req, res) => {
+  if (!isAdmin(req.userId)) return res.status(403).json({ error: 'Solo administradores pueden editar recetas' })
   try {
     const { id } = req.params;
     const { title, description, ingredients, steps, image, category } = req.body;
@@ -181,6 +219,7 @@ app.put('/api/recipes/:id', authMiddleware, async (req, res) => {
 });
 
 app.delete('/api/recipes/:id', authMiddleware, async (req, res) => {
+  if (!isAdmin(req.userId)) return res.status(403).json({ error: 'Solo administradores pueden eliminar recetas' })
   try {
     const { id } = req.params;
     const ok = deleteRecipe(id);

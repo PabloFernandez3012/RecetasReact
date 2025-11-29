@@ -33,6 +33,7 @@ db.exec(`
     email TEXT NOT NULL UNIQUE,
     passwordHash TEXT NOT NULL,
     name TEXT,
+    role TEXT NOT NULL DEFAULT 'user',
     createdAt TEXT NOT NULL
   );
   CREATE TABLE IF NOT EXISTS favorites (
@@ -164,10 +165,10 @@ export async function migrateFromJsonIfEmpty(jsonPath) {
 export const paths = { dbPath, dataDir }
 
 // ==== Users helpers ====
-export function createUser({ id, email, passwordHash, name }) {
+export function createUser({ id, email, passwordHash, name, role = 'user' }) {
   const now = new Date().toISOString()
-  const stmt = db.prepare('INSERT INTO users (id, email, passwordHash, name, createdAt) VALUES (?, ?, ?, ?, ?)')
-  stmt.run(id, email, passwordHash, name || null, now)
+  const stmt = db.prepare('INSERT INTO users (id, email, passwordHash, name, role, createdAt) VALUES (?, ?, ?, ?, ?, ?)')
+  stmt.run(id, email, passwordHash, name || null, role, now)
   return getUserByEmail(email)
 }
 
@@ -175,14 +176,14 @@ export function getUserByEmail(email) {
   const stmt = db.prepare('SELECT * FROM users WHERE email = ?')
   const row = stmt.get(email)
   if (!row) return null
-  return { id: row.id, email: row.email, passwordHash: row.passwordHash, name: row.name, createdAt: row.createdAt }
+  return { id: row.id, email: row.email, passwordHash: row.passwordHash, name: row.name, role: row.role, createdAt: row.createdAt }
 }
 
 export function getUserById(id) {
   const stmt = db.prepare('SELECT * FROM users WHERE id = ?')
   const row = stmt.get(id)
   if (!row) return null
-  return { id: row.id, email: row.email, passwordHash: row.passwordHash, name: row.name, createdAt: row.createdAt }
+  return { id: row.id, email: row.email, passwordHash: row.passwordHash, name: row.name, role: row.role, createdAt: row.createdAt }
 }
 
 // ==== Favorites helpers ====
@@ -230,5 +231,10 @@ try {
   const cols = db.prepare('PRAGMA table_info(users)').all()
   if (!cols.find(c => c.name === 'name')) {
     db.prepare('ALTER TABLE users ADD COLUMN name TEXT').run()
+  }
+  if (!cols.find(c => c.name === 'role')) {
+    db.prepare("ALTER TABLE users ADD COLUMN role TEXT NOT NULL DEFAULT 'user'").run()
+    // Backfill nulls if any (older rows)
+    db.prepare("UPDATE users SET role='user' WHERE role IS NULL").run()
   }
 } catch {}

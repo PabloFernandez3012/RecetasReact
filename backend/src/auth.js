@@ -13,7 +13,10 @@ export async function registerUser(email, password, name) {
   if (existing) throw new Error('Email ya registrado')
   const passwordHash = await bcrypt.hash(password, 10)
   const cleanName = name ? String(name).trim() : ''
-  const user = createUser({ id: nanoid(12), email, passwordHash, name: cleanName || null })
+  // Asignar role admin si email está en ADMIN_EMAILS
+  const adminEmails = (process.env.ADMIN_EMAILS || '').split(',').map(e => e.trim().toLowerCase()).filter(Boolean)
+  const role = adminEmails.includes(email) ? 'admin' : 'user'
+  const user = createUser({ id: nanoid(12), email, passwordHash, name: cleanName || null, role })
   return issueToken(user.id)
 }
 
@@ -52,7 +55,7 @@ export function requireAuth(req, res, next) {
 export function getMe(userId) {
   const u = getUserById(userId)
   if (!u) return null
-  return { id: u.id, email: u.email, name: u.name, createdAt: u.createdAt }
+  return { id: u.id, email: u.email, name: u.name, role: u.role, createdAt: u.createdAt }
 }
 
 export async function updateProfile(userId, { name, currentPassword, newPassword }) {
@@ -70,5 +73,10 @@ export async function updateProfile(userId, { name, currentPassword, newPassword
     ...(name !== undefined ? { name: String(name).trim() || null } : {}),
     ...(passwordHash ? { passwordHash } : {})
   })
-  return { id: updated.id, email: updated.email, name: updated.name, createdAt: updated.createdAt }
+  return { id: updated.id, email: updated.email, name: updated.name, role: updated.role, createdAt: updated.createdAt }
+}
+
+export function isAdmin(userId) {
+  const u = getUserById(userId)
+  return u && u.role === 'admin'
 }

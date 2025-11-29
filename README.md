@@ -87,6 +87,7 @@ El proyecto incluye autenticación basada en **JSON Web Tokens (JWT)** para prot
 | `POST` | `/api/register` | Registra un nuevo usuario y devuelve token |
 | `POST` | `/api/login` | Inicia sesión y devuelve token |
 | `GET` | `/api/me` | Devuelve datos del usuario autenticado |
+| `POST` | `/api/users/:id/promote` | Promueve un usuario a admin (solo admin) |
 
 ### 🛠 Estructura del usuario (no se exponen `passwordHash`):
 ```json
@@ -94,6 +95,7 @@ El proyecto incluye autenticación basada en **JSON Web Tokens (JWT)** para prot
   "id": "string",
   "name": "string",
   "email": "string",
+  "role": "admin | user",
   "createdAt": "ISO-8601"
 }
 ```
@@ -102,6 +104,7 @@ El proyecto incluye autenticación basada en **JSON Web Tokens (JWT)** para prot
 - Hash de contraseñas con `bcrypt`.
 - Tokens firmados con `HS256` (`JWT_SECRET`).
 - Rutas de mutación protegidas con middleware.
+- Roles: solo `admin` puede crear, editar y eliminar recetas. `user` puede leer y marcar favoritos.
 
 ### ⚠️ Mejoras futuras recomendadas
 - Rate limiting.
@@ -174,6 +177,25 @@ const onSubmit = async (data) => {
 ### ⚙️ Configuración
 
 **`frontend/src/lib/queryClient.js`**:
+## Roles y Superusuario
+
+El sistema soporta roles:
+- `admin`: puede realizar operaciones de creación, edición y eliminación de recetas.
+- `user`: acceso de solo lectura y uso de favoritos.
+
+Asignación inicial de admin:
+Define `ADMIN_EMAILS` (separado por comas) en las variables de entorno del backend. Cualquier email que se registre coincidiendo con esa lista obtiene rol `admin`.
+
+Promoción manual:
+Endpoint protegido: `POST /api/users/:id/promote` (solo un admin existente). Actualiza el rol del usuario a `admin`.
+
+Ejemplo (PowerShell):
+```powershell
+$token = "<TOKEN_ADMIN>"
+Invoke-RestMethod -Method POST -Uri "http://localhost:3001/api/users/USER_ID/promote" -Headers @{Authorization="Bearer $token"}
+```
+
+Verificación de rol en frontend: la UI muestra botones de edición / creación sólo si el usuario autenticado tiene `role === 'admin'`.
 ```javascript
 export const queryClient = new QueryClient({
   defaultOptions: {
