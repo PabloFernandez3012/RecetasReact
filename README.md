@@ -43,6 +43,7 @@ Aplicación de recetas con frontend en React y backend en Node.js/Express. Permi
 - **Frontend desacoplado** del backend mediante `VITE_API_BASE`
 - **Persistencia con SQLite** mediante `better-sqlite3`, migración inicial desde JSON y script de importación
 - **Custom hooks** para reutilización de lógica de fetching y mutations
+- **Autenticación JWT** (registro, login, sesión y protección de rutas de escritura)
 
 ---
 
@@ -65,6 +66,46 @@ Aplicación de recetas con frontend en React y backend en Node.js/Express. Permi
 ### Herramientas
 - concurrently
 - nodemon
+
+---
+
+## Autenticación (JWT)
+
+El proyecto incluye autenticación basada en **JSON Web Tokens (JWT)** para proteger las operaciones de creación, edición y eliminación de recetas.
+
+### 🔐 Flujo
+1. El usuario se registra (`/api/register`) o inicia sesión (`/api/login`).
+2. El backend devuelve un `token` JWT.
+3. El frontend guarda el token en `localStorage` (`auth_token`).
+4. Las rutas protegidas envían `Authorization: Bearer <token>`.
+5. Mutaciones (POST/PUT/DELETE) requieren token válido.
+
+### 🧩 Endpoints de autenticación
+| Método | Endpoint | Descripción |
+|--------|----------|-------------|
+| `POST` | `/api/register` | Registra un nuevo usuario y devuelve token |
+| `POST` | `/api/login` | Inicia sesión y devuelve token |
+| `GET` | `/api/me` | Devuelve datos del usuario autenticado |
+
+### 🛠 Estructura del usuario (no se exponen `passwordHash`):
+```json
+{
+  "id": "string",
+  "email": "string",
+  "createdAt": "ISO-8601"
+}
+```
+
+### ✅ Seguridad básica incluida
+- Hash de contraseñas con `bcrypt`.
+- Tokens firmados con `HS256` (`JWT_SECRET`).
+- Rutas de mutación protegidas con middleware.
+
+### ⚠️ Mejoras futuras recomendadas
+- Rate limiting.
+- Refresh tokens / expiración más corta.
+- Cookies httpOnly para evitar XSS.
+- Validaciones adicionales de password (longitud, complejidad).
 
 ---
 
@@ -204,6 +245,22 @@ Para producción, el frontend necesita la URL base del backend mediante `VITE_AP
 | `VITE_API_BASE` | URL base del backend | `https://tu-backend.onrender.com` |
 
 **Configuración en Vercel:**
+## Variables de entorno del backend
+
+Agregar la variable `JWT_SECRET` en el servicio donde desplegues el backend para asegurar la firma de los tokens.
+
+| Variable | Descripción | Ejemplo |
+|----------|-------------|---------|
+| `JWT_SECRET` | Clave secreta para firmar JWT | `b1f6e0f9a4c24f5f9d0a3d...` |
+
+Generar una secreta rápida:
+```powershell
+node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
+```
+
+Si no se define, se usa un valor de desarrollo (`dev-secret`). No usar en producción.
+
+---
 1. Ve a Project Settings → Environment Variables
 2. Agrega la variable `VITE_API_BASE`
 3. Realiza un redeploy
@@ -231,14 +288,17 @@ Para producción, el frontend necesita la URL base del backend mediante `VITE_AP
 
 ### Endpoints del backend
 
-| Método | Endpoint | Descripción |
-|--------|----------|-------------|
-| `GET` | `/api/health` | Estado de la API |
-| `GET` | `/api/recipes` | Lista de recetas |
-| `GET` | `/api/recipes/:id` | Detalle de receta |
-| `POST` | `/api/recipes` | Crea una receta |
-| `PUT` | `/api/recipes/:id` | Actualiza una receta |
-| `DELETE` | `/api/recipes/:id` | Elimina una receta |
+| Método | Endpoint | Descripción | Auth |
+|--------|----------|-------------|------|
+| `GET` | `/api/health` | Estado de la API | Público |
+| `GET` | `/api/recipes` | Lista de recetas | Público |
+| `GET` | `/api/recipes/:id` | Detalle de receta | Público |
+| `POST` | `/api/recipes` | Crea una receta | Bearer JWT |
+| `PUT` | `/api/recipes/:id` | Actualiza una receta | Bearer JWT |
+| `DELETE` | `/api/recipes/:id` | Elimina una receta | Bearer JWT |
+| `POST` | `/api/register` | Registro de usuario | Público |
+| `POST` | `/api/login` | Login de usuario | Público |
+| `GET` | `/api/me` | Perfil autenticado | Bearer JWT |
 
 **Estructura de receta:**
 
@@ -289,7 +349,7 @@ node src/scripts/import-recipes.js C:\\ruta\\a\\mis-recetas.json
 
 ## Notas
 
-- **Seguridad:** El proyecto no incluye autenticación. Si lo despliegas públicamente, considera añadir auth y rate limiting.
+- **Seguridad:** Incluye autenticación JWT básica. Para producción agrega rate limiting, cookies httpOnly y rotación de tokens.
 - **Persistencia:** SQLite en archivo con WAL habilitado. El archivo se ubica en `backend/src/data/recipes.db`.
 
 ---

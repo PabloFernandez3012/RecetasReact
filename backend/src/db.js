@@ -28,6 +28,12 @@ db.exec(`
     createdAt TEXT NOT NULL,
     updatedAt TEXT NOT NULL
   );
+  CREATE TABLE IF NOT EXISTS users (
+    id TEXT PRIMARY KEY,
+    email TEXT NOT NULL UNIQUE,
+    passwordHash TEXT NOT NULL,
+    createdAt TEXT NOT NULL
+  );
 `)
 
 function mapRow(row) {
@@ -147,3 +153,25 @@ export async function migrateFromJsonIfEmpty(jsonPath) {
 }
 
 export const paths = { dbPath, dataDir }
+
+// ==== Users helpers ====
+export function createUser({ id, email, passwordHash }) {
+  const now = new Date().toISOString()
+  const stmt = db.prepare('INSERT INTO users (id, email, passwordHash, createdAt) VALUES (?, ?, ?, ?)')
+  stmt.run(id, email, passwordHash, now)
+  return getUserByEmail(email)
+}
+
+export function getUserByEmail(email) {
+  const stmt = db.prepare('SELECT * FROM users WHERE email = ?')
+  const row = stmt.get(email)
+  if (!row) return null
+  return { id: row.id, email: row.email, passwordHash: row.passwordHash, createdAt: row.createdAt }
+}
+
+export function getUserById(id) {
+  const stmt = db.prepare('SELECT * FROM users WHERE id = ?')
+  const row = stmt.get(id)
+  if (!row) return null
+  return { id: row.id, email: row.email, passwordHash: row.passwordHash, createdAt: row.createdAt }
+}

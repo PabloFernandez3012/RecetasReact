@@ -5,6 +5,7 @@ import { dirname, join } from 'path';
 import { promises as fs } from 'fs';
 import { nanoid } from 'nanoid';
 import { getAllRecipes, getRecipe, createRecipe, updateRecipe, deleteRecipe, migrateFromJsonIfEmpty, paths } from './db.js';
+import { registerUser, loginUser, authMiddleware, getMe } from './auth.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -41,6 +42,33 @@ app.get('/api/health', (_req, res) => {
   res.json({ ok: true });
 });
 
+// === Auth endpoints ===
+app.post('/api/register', async (req, res) => {
+  try {
+    const { email, password } = req.body
+    const { token } = await registerUser(email, password)
+    res.status(201).json({ token })
+  } catch (err) {
+    res.status(400).json({ error: err.message })
+  }
+})
+
+app.post('/api/login', async (req, res) => {
+  try {
+    const { email, password } = req.body
+    const { token } = await loginUser(email, password)
+    res.json({ token })
+  } catch (err) {
+    res.status(400).json({ error: err.message })
+  }
+})
+
+app.get('/api/me', authMiddleware, (req, res) => {
+  const user = getMe(req.userId)
+  if (!user) return res.status(404).json({ error: 'Usuario no encontrado' })
+  res.json({ id: user.id, email: user.email, createdAt: user.createdAt })
+})
+
 app.get('/api/recipes', async (_req, res) => {
   try {
     const recipes = await readRecipes();
@@ -60,7 +88,7 @@ app.get('/api/recipes/:id', async (req, res) => {
   }
 });
 
-app.post('/api/recipes', async (req, res) => {
+app.post('/api/recipes', authMiddleware, async (req, res) => {
   try {
     const { title, description, ingredients, steps, image, category } = req.body;
     if (!title || !description) return res.status(400).json({ error: 'title y description son requeridos' });
@@ -87,7 +115,7 @@ app.post('/api/recipes', async (req, res) => {
   }
 });
 
-app.put('/api/recipes/:id', async (req, res) => {
+app.put('/api/recipes/:id', authMiddleware, async (req, res) => {
   try {
     const { id } = req.params;
     const { title, description, ingredients, steps, image, category } = req.body;
@@ -115,7 +143,7 @@ app.put('/api/recipes/:id', async (req, res) => {
   }
 });
 
-app.delete('/api/recipes/:id', async (req, res) => {
+app.delete('/api/recipes/:id', authMiddleware, async (req, res) => {
   try {
     const { id } = req.params;
     const ok = deleteRecipe(id);

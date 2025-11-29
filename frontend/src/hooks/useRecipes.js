@@ -1,6 +1,11 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { apiUrl } from '../lib/api'
 
+function authHeaders() {
+  const token = localStorage.getItem('auth_token')
+  return token ? { Authorization: `Bearer ${token}` } : {}
+}
+
 // ===== QUERIES (Lecturas) =====
 
 /**
@@ -48,7 +53,7 @@ export function useCreateRecipe() {
     mutationFn: async (newRecipe) => {
       const response = await fetch(apiUrl('/api/recipes'), {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', ...authHeaders() },
         body: JSON.stringify(newRecipe),
       })
       if (!response.ok) {
@@ -73,7 +78,7 @@ export function useUpdateRecipe() {
     mutationFn: async ({ id, data }) => {
       const response = await fetch(apiUrl(`/api/recipes/${id}`), {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', ...authHeaders() },
         body: JSON.stringify(data),
       })
       if (!response.ok) {
@@ -99,6 +104,7 @@ export function useDeleteRecipe() {
     mutationFn: async (id) => {
       const response = await fetch(apiUrl(`/api/recipes/${id}`), {
         method: 'DELETE',
+        headers: { ...authHeaders() }
       })
       if (!response.ok) {
         throw new Error('Error al eliminar la receta')
