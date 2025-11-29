@@ -50,12 +50,12 @@ export default function App() {
         <Routes>
           <Route path="/" element={<RecipeList />} />
           <Route path="/recipe/:id" element={<RecipeDetail />} />
-          <Route path="/new" element={isSuccess && me?.role === 'admin' ? <RecipeForm /> : <Login />} />
-          <Route path="/edit/:id" element={isSuccess && me?.role === 'admin' ? <RecipeForm /> : <Login />} />
+          <Route path="/new" element={hasToken && isSuccess && me?.role === 'admin' ? <RecipeForm /> : <Login />} />
+          <Route path="/edit/:id" element={hasToken && isSuccess && me?.role === 'admin' ? <RecipeForm /> : <Login />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
-          <Route path="/profile" element={isSuccess ? <Profile /> : <Login />} />
-          <Route path="/favorites" element={isSuccess ? <Favorites /> : <Login />} />
+          <Route path="/profile" element={hasToken && isSuccess ? <Profile /> : <Login />} />
+          <Route path="/favorites" element={hasToken && isSuccess ? <Favorites /> : <Login />} />
         </Routes>
       </main>
       <Footer />
