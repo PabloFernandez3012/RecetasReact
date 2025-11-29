@@ -1,5 +1,6 @@
 import { useMutation, useQuery } from '@tanstack/react-query'
 import { apiUrl } from '../lib/api'
+import { queryClient } from '../lib/queryClient'
 
 function saveToken(token) {
   localStorage.setItem('auth_token', token)
@@ -27,11 +28,11 @@ export function useLogin() {
 
 export function useRegister() {
   return useMutation({
-    mutationFn: async ({ email, password }) => {
+    mutationFn: async ({ email, password, name }) => {
       const res = await fetch(apiUrl('/api/register'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password })
+        body: JSON.stringify({ email, password, name })
       })
       const data = await res.json()
       if (!res.ok) throw new Error(data.error || 'Error en registro')
@@ -60,4 +61,27 @@ export function useMe(enabled = true) {
 
 export function logout() {
   localStorage.removeItem('auth_token')
+}
+
+export function useUpdateProfile() {
+  return useMutation({
+    mutationFn: async ({ name, currentPassword, newPassword }) => {
+      const token = getToken()
+      if (!token) throw new Error('No autenticado')
+      const res = await fetch(apiUrl('/api/profile'), {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`
+        },
+        body: JSON.stringify({ name, currentPassword, newPassword })
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error || 'Error actualizando perfil')
+      return data
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['me'] })
+    }
+  })
 }

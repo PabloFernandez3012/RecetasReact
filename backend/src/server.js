@@ -5,7 +5,7 @@ import { dirname, join } from 'path';
 import { promises as fs } from 'fs';
 import { nanoid } from 'nanoid';
 import { getAllRecipes, getRecipe, createRecipe, updateRecipe, deleteRecipe, migrateFromJsonIfEmpty, paths } from './db.js';
-import { registerUser, loginUser, authMiddleware, getMe } from './auth.js';
+import { registerUser, loginUser, authMiddleware, getMe, updateProfile } from './auth.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -45,8 +45,8 @@ app.get('/api/health', (_req, res) => {
 // === Auth endpoints ===
 app.post('/api/register', async (req, res) => {
   try {
-    const { email, password } = req.body
-    const { token } = await registerUser(email, password)
+    const { email, password, name } = req.body
+    const { token } = await registerUser(email, password, name)
     res.status(201).json({ token })
   } catch (err) {
     res.status(400).json({ error: err.message })
@@ -66,7 +66,17 @@ app.post('/api/login', async (req, res) => {
 app.get('/api/me', authMiddleware, (req, res) => {
   const user = getMe(req.userId)
   if (!user) return res.status(404).json({ error: 'Usuario no encontrado' })
-  res.json({ id: user.id, email: user.email, createdAt: user.createdAt })
+  res.json(user)
+})
+
+app.put('/api/profile', authMiddleware, async (req, res) => {
+  try {
+    const { name, currentPassword, newPassword } = req.body
+    const updated = await updateProfile(req.userId, { name, currentPassword, newPassword })
+    res.json(updated)
+  } catch (err) {
+    res.status(400).json({ error: err.message })
+  }
 })
 
 app.get('/api/recipes', async (_req, res) => {

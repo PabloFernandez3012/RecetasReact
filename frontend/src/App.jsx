@@ -6,6 +6,7 @@ import Container from './components/ui/Container'
 import RecipeList from './pages/RecipeList'
 import RecipeDetail from './pages/RecipeDetail'
 import RecipeForm from './pages/RecipeForm'
+import Profile from './pages/Profile'
 import Login from './pages/Login'
 import Register from './pages/Register'
 import { useMe, logout } from './hooks/useAuth'
@@ -31,6 +32,7 @@ export default function App() {
           {isSuccess ? (
             <>
               <span style={{fontSize:'0.9rem'}}>Hola, {me.name || me.email}</span>
+              <Link to="/profile" className="btn" style={{background:'#333'}}>Editar perfil</Link>
               <button onClick={onLogout} className="btn" style={{background:'#444'}}>Salir</button>
             </>
           ) : (
@@ -49,6 +51,7 @@ export default function App() {
           <Route path="/edit/:id" element={isSuccess ? <RecipeForm /> : <Login />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
+          <Route path="/profile" element={isSuccess ? <Profile /> : <Login />} />
         </Routes>
       </main>
       <Footer />

@@ -1,18 +1,19 @@
 import jwt from 'jsonwebtoken'
 import bcrypt from 'bcrypt'
 import { nanoid } from 'nanoid'
-import { createUser, getUserByEmail, getUserById } from './db.js'
+import { createUser, getUserByEmail, getUserById, updateUser } from './db.js'
 
 const JWT_SECRET = process.env.JWT_SECRET || 'dev-secret'
 const TOKEN_EXPIRES = '7d'
 
-export async function registerUser(email, password) {
+export async function registerUser(email, password, name) {
   email = String(email || '').trim().toLowerCase()
   if (!email || !password) throw new Error('Email y password requeridos')
   const existing = getUserByEmail(email)
   if (existing) throw new Error('Email ya registrado')
   const passwordHash = await bcrypt.hash(password, 10)
-  const user = createUser({ id: nanoid(12), email, passwordHash })
+  const cleanName = name ? String(name).trim() : ''
+  const user = createUser({ id: nanoid(12), email, passwordHash, name: cleanName || null })
   return issueToken(user.id)
 }
 
@@ -49,5 +50,25 @@ export function requireAuth(req, res, next) {
 }
 
 export function getMe(userId) {
-  return getUserById(userId)
+  const u = getUserById(userId)
+  if (!u) return null
+  return { id: u.id, email: u.email, name: u.name, createdAt: u.createdAt }
+}
+
+export async function updateProfile(userId, { name, currentPassword, newPassword }) {
+  const user = getUserById(userId)
+  if (!user) throw new Error('Usuario no encontrado')
+  let passwordHash
+  if (newPassword) {
+    if (!currentPassword) throw new Error('currentPassword requerido para cambiar contraseña')
+    const ok = await bcrypt.compare(currentPassword, user.passwordHash)
+    if (!ok) throw new Error('Contraseña actual incorrecta')
+    if (newPassword.length < 6) throw new Error('La nueva contraseña debe tener al menos 6 caracteres')
+    passwordHash = await bcrypt.hash(newPassword, 10)
+  }
+  const updated = updateUser(userId, {
+    ...(name !== undefined ? { name: String(name).trim() || null } : {}),
+    ...(passwordHash ? { passwordHash } : {})
+  })
+  return { id: updated.id, email: updated.email, name: updated.name, createdAt: updated.createdAt }
 }
