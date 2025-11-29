@@ -15,11 +15,19 @@ export function useRecipes() {
   return useQuery({
     queryKey: ['recipes'],
     queryFn: async () => {
-      const response = await fetch(apiUrl('/api/recipes-summary'))
-      if (!response.ok) {
-        throw new Error('Error al cargar las recetas')
+      // Intentar endpoint resumido; si no existe (404) o falla, caer a /api/recipes
+      try {
+        const res = await fetch(apiUrl('/api/recipes-summary'))
+        if (res.ok) return res.json()
+        // Fallback si no está publicado aún en el backend
+        const fallback = await fetch(apiUrl('/api/recipes'))
+        if (!fallback.ok) throw new Error('Error al cargar las recetas')
+        return fallback.json()
+      } catch {
+        const res2 = await fetch(apiUrl('/api/recipes'))
+        if (!res2.ok) throw new Error('Error al cargar las recetas')
+        return res2.json()
       }
-      return response.json()
     },
   })
 }

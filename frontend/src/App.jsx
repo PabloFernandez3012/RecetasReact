@@ -29,9 +29,13 @@ export default function App() {
     queryClient.prefetchQuery({
       queryKey: ['recipes'],
       queryFn: async () => {
-        const res = await fetch(apiUrl('/api/recipes'))
-        if (!res.ok) throw new Error('Error cargando recetas')
-        return res.json()
+        try {
+          const res = await fetch(apiUrl('/api/recipes-summary'))
+          if (res.ok) return res.json()
+        } catch {}
+        const res2 = await fetch(apiUrl('/api/recipes'))
+        if (!res2.ok) throw new Error('Error cargando recetas')
+        return res2.json()
       }
     })
   }, [])
