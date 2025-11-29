@@ -8,6 +8,7 @@ import RecipeList from './pages/RecipeList'
 import RecipeDetail from './pages/RecipeDetail'
 import RecipeForm from './pages/RecipeForm'
 import Profile from './pages/Profile'
+import About from './pages/About'
 import Favorites from './pages/Favorites'
 import AdminSuggestions from './pages/AdminSuggestions'
 import Login from './pages/Login'
@@ -45,6 +46,9 @@ export default function App() {
     <Container>
       <header>
         <h1><Link to="/">Recetas de Pablo</Link></h1>
+        <div style={{width:'100%', display:'flex', gap:8}}>
+          <Link to="/about" className="btn" style={{background:'#555'}}>Acerca de</Link>
+        </div>
         <ThemeToggle />
         <nav style={{display:'flex',alignItems:'center',gap:12,flexWrap:'wrap', width:'100%'}}>
           {hasToken && isSuccess && me?.role === 'admin' && (
@@ -81,6 +85,7 @@ export default function App() {
           <Route path="/profile" element={hasToken && isSuccess ? <Profile /> : <Login />} />
           <Route path="/favorites" element={hasToken && isSuccess ? <Favorites /> : <Login />} />
           <Route path="/admin/suggestions" element={isSuccess && me?.role === 'admin' ? <AdminSuggestions /> : <Login />} />
+          <Route path="/about" element={<About />} />
         </Routes>
       </main>
       <Footer />
