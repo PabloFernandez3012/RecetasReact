@@ -180,8 +180,18 @@ const onSubmit = async (data) => {
 ## Roles y Superusuario
 
 El sistema soporta roles:
-- `admin`: puede realizar operaciones de creación, edición y eliminación de recetas.
-- `user`: acceso de solo lectura y uso de favoritos.
+
+### 🔑 Credenciales de prueba
+
+**Superusuario (admin):**
+- Email: `pablo@pablo.com`
+- Contraseña: `123456`
+
+Este usuario tiene permisos completos para crear, editar y eliminar recetas.
+
+---
+
+### Asignación de roles
 
 Asignación inicial de admin:
 Define `ADMIN_EMAILS` (separado por comas) en las variables de entorno del backend. Cualquier email que se registre coincidiendo con esa lista obtiene rol `admin`.
