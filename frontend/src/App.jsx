@@ -1,4 +1,5 @@
 import { Link, Route, Routes, useNavigate } from 'react-router-dom'
+import { useEffect } from 'react'
 import MegaMenu from './components/MegaMenu'
 import ThemeToggle from './components/ThemeToggle'
 import Footer from './components/Footer'
@@ -11,6 +12,8 @@ import Favorites from './pages/Favorites'
 import Login from './pages/Login'
 import Register from './pages/Register'
 import { useMe, logout } from './hooks/useAuth'
+import { queryClient } from './lib/queryClient'
+import { apiUrl } from './lib/api'
 
 export default function App() {
   const hasToken = Boolean(localStorage.getItem('auth_token'))
@@ -20,6 +23,18 @@ export default function App() {
     logout()
     navigate('/login')
   }
+  
+  // Prefetch de recetas al cargar la app para cache instantáneo
+  useEffect(() => {
+    queryClient.prefetchQuery({
+      queryKey: ['recipes'],
+      queryFn: async () => {
+        const res = await fetch(apiUrl('/api/recipes'))
+        if (!res.ok) throw new Error('Error cargando recetas')
+        return res.json()
+      }
+    })
+  }, [])
   return (
     <Container>
       <header>

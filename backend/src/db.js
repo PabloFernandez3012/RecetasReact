@@ -6,8 +6,12 @@ import { promises as fsp } from 'fs'
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = dirname(__filename)
-const dataDir = join(__dirname, 'data')
-const dbPath = join(dataDir, 'recipes.db')
+// Permitir configurar la ruta de datos vía variables de entorno para despliegues (Railway/Render)
+const envDataDir = process.env.DATA_DIR && process.env.DATA_DIR.trim()
+const envDbPath = process.env.DB_PATH && process.env.DB_PATH.trim()
+const defaultDataDir = join(__dirname, 'data')
+const dataDir = envDbPath ? dirname(envDbPath) : (envDataDir || defaultDataDir)
+const dbPath = envDbPath || join(dataDir, 'recipes.db')
 
 // Asegurar carpeta de datos (sin top-level await)
 try { fs.mkdirSync(dataDir, { recursive: true }) } catch {}

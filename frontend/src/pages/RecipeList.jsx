@@ -85,7 +85,7 @@ export default function RecipeList() {
         const isFav = favIds.includes(r.id)
         return (
           <Card key={r.id} as="article">
-            {r.image ? <img src={r.image} alt={r.title} /> : null}
+            {r.image ? <img src={r.image} alt={r.title} loading="lazy" /> : null}
             <h3><Link to={`/recipe/${r.id}`}>{r.title}</Link></h3>
             <p>{r.description}</p>
             <div>
