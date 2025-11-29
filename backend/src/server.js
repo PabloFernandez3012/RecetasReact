@@ -81,36 +81,24 @@ app.put('/api/profile', authMiddleware, async (req, res) => {
 })
 
 // Promover usuario a admin (solo un admin existente puede hacerlo)
-app.post('/api/users/:id/promote', authMiddleware, (req, res) => {
-  if (!isAdmin(req.userId)) return res.status(403).json({ error: 'Solo administradores pueden promover usuarios' })
-  const targetId = req.params.id
-  const target = getMe(targetId)
-  if (!target) return res.status(404).json({ error: 'Usuario no encontrado' })
-  // Actualizar role directamente
+app.post('/api/users/:id/promote', authMiddleware, async (req, res) => {
   try {
-    const stmt = `UPDATE users SET role='admin' WHERE id = ?`
-    import('./db.js').then(mod => {
-      mod.default // no default, ignore; using db via dynamic import not needed
-    })
-  } catch {}
-  // Usamos db directa (require sin ESM). Simplificamos con una preparación rápida.
-  try {
-    const sqlite = require('better-sqlite3')
-  } catch {}
-  // Reutilizamos getUserById vía auth helper
-  const current = getMe(targetId)
-  if (current && current.role === 'admin') {
-    return res.json(current)
-  }
-  try {
-    const dbMod = await import('./db.js')
-    const dbPath = dbMod.paths.dbPath
+    if (!isAdmin(req.userId)) return res.status(403).json({ error: 'Solo administradores pueden promover usuarios' })
+    const targetId = req.params.id
+    const target = getMe(targetId)
+    if (!target) return res.status(404).json({ error: 'Usuario no encontrado' })
+    // Operación directa sobre la misma conexión ya inicializada en db.js
+    const { getUserById } = await import('./db.js')
+    // better-sqlite3: necesitamos acceso a la instancia para ejecutar UPDATE sin crear una nueva.
+    // Simplificación: usar dynamic import para ejecutar un UPDATE manual vía prepared statement expuesto.
+    // Como no exportamos la instancia, haremos workaround temporal: reabrir la DB y actualizar.
+    const { paths } = await import('./db.js')
     const Database = (await import('better-sqlite3')).default
-    const tempDb = new Database(dbPath)
-    tempDb.prepare("UPDATE users SET role='admin' WHERE id = ?").run(targetId)
-    const updated = dbMod.getUserById(targetId)
-    res.json({ id: updated.id, email: updated.email, name: updated.name, role: updated.role, createdAt: updated.createdAt })
-    tempDb.close()
+    const temp = new Database(paths.dbPath)
+    temp.prepare("UPDATE users SET role='admin' WHERE id = ?").run(targetId)
+    const updated = temp.prepare('SELECT id,email,name,role,createdAt FROM users WHERE id = ?').get(targetId)
+    temp.close()
+    res.json(updated)
   } catch (err) {
     res.status(500).json({ error: 'Error promoviendo usuario', details: String(err) })
   }
