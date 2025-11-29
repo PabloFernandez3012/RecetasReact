@@ -96,14 +96,18 @@ export default function RecipeDetail() {
             {isFav ? '★ Favorito' : '☆ Favorito'}
           </button>
         )}
-        <Link className="btn" to={`/edit/${recipe.id}`}>Editar</Link>
-        <button
-          className="btn danger"
-          onClick={onDelete}
-          disabled={deleteMutation.isPending}
-        >
-          {deleteMutation.isPending ? '⏳ Eliminando...' : 'Eliminar'}
-        </button>
+        {me?.role === 'admin' && (
+          <>
+            <Link className="btn" to={`/edit/${recipe.id}`}>Editar</Link>
+            <button
+              className="btn danger"
+              onClick={onDelete}
+              disabled={deleteMutation.isPending}
+            >
+              {deleteMutation.isPending ? '⏳ Eliminando...' : 'Eliminar'}
+            </button>
+          </>
+        )}
       </div>
     </article>
   )
