@@ -4,7 +4,7 @@ import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
 import { promises as fs } from 'fs';
 import { nanoid } from 'nanoid';
-import { getAllRecipes, getRecipe, createRecipe, updateRecipe, deleteRecipe, migrateFromJsonIfEmpty, paths } from './db.js';
+import { getAllRecipes, getRecipe, createRecipe, updateRecipe, deleteRecipe, migrateFromJsonIfEmpty, paths, addFavorite, removeFavorite, getFavorites, getFavoriteIds } from './db.js';
 import { registerUser, loginUser, authMiddleware, getMe, updateProfile } from './auth.js';
 import net from 'net';
 
@@ -98,6 +98,32 @@ app.get('/api/recipes/:id', async (req, res) => {
     res.status(500).json({ error: 'Error leyendo receta', details: String(err) });
   }
 });
+
+// Favoritos
+app.get('/api/favorites', authMiddleware, (req, res) => {
+  try {
+    const favs = getFavorites(req.userId)
+    res.json(favs)
+  } catch (err) {
+    res.status(500).json({ error: 'Error leyendo favoritos', details: String(err) })
+  }
+})
+
+app.post('/api/recipes/:id/like', authMiddleware, (req, res) => {
+  const recipeId = req.params.id
+  const recipe = getRecipe(recipeId)
+  if (!recipe) return res.status(404).json({ error: 'Receta no encontrada' })
+  addFavorite(req.userId, recipeId)
+  res.status(201).json({ ok: true })
+})
+
+app.delete('/api/recipes/:id/like', authMiddleware, (req, res) => {
+  const recipeId = req.params.id
+  const recipe = getRecipe(recipeId)
+  if (!recipe) return res.status(404).json({ error: 'Receta no encontrada' })
+  removeFavorite(req.userId, recipeId)
+  res.status(204).send()
+})
 
 app.post('/api/recipes', authMiddleware, async (req, res) => {
   try {

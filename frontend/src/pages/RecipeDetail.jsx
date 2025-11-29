@@ -1,11 +1,19 @@
 import { Link, useParams, useNavigate } from 'react-router-dom'
 import { useRecipe, useDeleteRecipe } from '../hooks/useRecipes'
+import { useFavorites, useLikeRecipe, useUnlikeRecipe } from '../hooks/useFavorites'
+import { useMe } from '../hooks/useAuth'
 
 export default function RecipeDetail() {
   const { id } = useParams()
   const navigate = useNavigate()
   const { data: recipe, isLoading, isError, error } = useRecipe(id)
   const deleteMutation = useDeleteRecipe()
+  const { data: me } = useMe(Boolean(localStorage.getItem('auth_token')))
+  const { data: favorites } = useFavorites(Boolean(localStorage.getItem('auth_token')))
+  const likeMutation = useLikeRecipe()
+  const unlikeMutation = useUnlikeRecipe()
+  const favIds = Array.isArray(favorites) ? favorites.map(r => r.id) : []
+  const isFav = favIds.includes(id)
 
   const onDelete = async () => {
     if (!confirm('¿Eliminar receta?')) return
@@ -71,10 +79,26 @@ export default function RecipeDetail() {
       <ol>
         {recipe.steps?.map((s, i) => <li key={i}>{s}</li>)}
       </ol>
-      <div className="actions">
+      <div className="actions" style={{display:'flex',flexWrap:'wrap',gap:8}}>
+        {me && (
+          <button
+            className="btn"
+            onClick={() => {
+              if (isFav) {
+                unlikeMutation.mutate(id)
+              } else {
+                likeMutation.mutate(id)
+              }
+            }}
+            disabled={likeMutation.isPending || unlikeMutation.isPending}
+            title={isFav ? 'Quitar de favoritos' : 'Agregar a favoritos'}
+          >
+            {isFav ? '★ Favorito' : '☆ Favorito'}
+          </button>
+        )}
         <Link className="btn" to={`/edit/${recipe.id}`}>Editar</Link>
-        <button 
-          className="btn danger" 
+        <button
+          className="btn danger"
           onClick={onDelete}
           disabled={deleteMutation.isPending}
         >

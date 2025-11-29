@@ -35,6 +35,14 @@ db.exec(`
     name TEXT,
     createdAt TEXT NOT NULL
   );
+  CREATE TABLE IF NOT EXISTS favorites (
+    userId TEXT NOT NULL,
+    recipeId TEXT NOT NULL,
+    createdAt TEXT NOT NULL,
+    PRIMARY KEY (userId, recipeId),
+    FOREIGN KEY (userId) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (recipeId) REFERENCES recipes(id) ON DELETE CASCADE
+  );
 `)
 
 function mapRow(row) {
@@ -175,6 +183,30 @@ export function getUserById(id) {
   const row = stmt.get(id)
   if (!row) return null
   return { id: row.id, email: row.email, passwordHash: row.passwordHash, name: row.name, createdAt: row.createdAt }
+}
+
+// ==== Favorites helpers ====
+export function addFavorite(userId, recipeId) {
+  const now = new Date().toISOString()
+  try {
+    db.prepare('INSERT INTO favorites (userId, recipeId, createdAt) VALUES (?, ?, ?)').run(userId, recipeId, now)
+  } catch {}
+  return true
+}
+
+export function removeFavorite(userId, recipeId) {
+  const info = db.prepare('DELETE FROM favorites WHERE userId = ? AND recipeId = ?').run(userId, recipeId)
+  return info.changes > 0
+}
+
+export function getFavoriteIds(userId) {
+  const rows = db.prepare('SELECT recipeId FROM favorites WHERE userId = ?').all(userId)
+  return rows.map(r => r.recipeId)
+}
+
+export function getFavorites(userId) {
+  const stmt = db.prepare(`SELECT r.* FROM favorites f JOIN recipes r ON r.id = f.recipeId WHERE f.userId = ? ORDER BY datetime(f.createdAt) DESC`)
+  return stmt.all(userId).map(mapRow)
 }
 
 export function updateUser(id, fields) {

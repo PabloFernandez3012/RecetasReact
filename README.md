@@ -44,6 +44,7 @@ Aplicación de recetas con frontend en React y backend en Node.js/Express. Permi
 - **Persistencia con SQLite** mediante `better-sqlite3`, migración inicial desde JSON y script de importación
 - **Custom hooks** para reutilización de lógica de fetching y mutations
 - **Autenticación JWT** (registro, login, sesión y protección de rutas de escritura)
+- **Favoritos**: marcar recetas como favoritas (like) y verlas en una sección dedicada
 
 ---
 
@@ -300,6 +301,9 @@ Si no se define, se usa un valor de desarrollo (`dev-secret`). No usar en produc
 | `POST` | `/api/register` | Registro de usuario | Público |
 | `POST` | `/api/login` | Login de usuario | Público |
 | `GET` | `/api/me` | Perfil autenticado | Bearer JWT |
+| `GET` | `/api/favorites` | Listar recetas favoritas del usuario | Bearer JWT |
+| `POST` | `/api/recipes/:id/like` | Marcar receta como favorita | Bearer JWT |
+| `DELETE` | `/api/recipes/:id/like` | Quitar receta de favoritos | Bearer JWT |
 
 **Estructura de receta:**
 
@@ -316,6 +320,24 @@ Si no se define, se usa un valor de desarrollo (`dev-secret`). No usar en produc
   "updatedAt": "ISO-8601"
 }
 ```
+
+**Favoritos (relación):**
+La tabla `favorites` almacena pares `userId` y `recipeId`. Un usuario solo puede marcar una vez cada receta.
+
+```json
+{
+  "userId": "string",
+  "recipeId": "string",
+  "createdAt": "ISO-8601"
+}
+```
+
+### Uso en frontend
+
+- Hook `useFavorites()` obtiene el array de recetas favoritas.
+- Mutaciones `useLikeRecipe()` y `useUnlikeRecipe()` para marcar / desmarcar.
+- Botón togglable en `RecipeDetail`: muestra `★ Favorito` o `☆ Favorito`.
+- Página `Favorites.jsx` lista todas las recetas favoritas del usuario autenticado.
 
 ---
 
