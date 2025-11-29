@@ -48,10 +48,18 @@ db.exec(`
     FOREIGN KEY (userId) REFERENCES users(id) ON DELETE CASCADE,
     FOREIGN KEY (recipeId) REFERENCES recipes(id) ON DELETE CASCADE
   );
+  CREATE TABLE IF NOT EXISTS suggestions (
+    id TEXT PRIMARY KEY,
+    userId TEXT NOT NULL,
+    text TEXT NOT NULL,
+    createdAt TEXT NOT NULL,
+    FOREIGN KEY (userId) REFERENCES users(id) ON DELETE CASCADE
+  );
   -- Índices para mejorar rendimiento en listados y favoritos
   CREATE INDEX IF NOT EXISTS idx_recipes_createdAt ON recipes (createdAt);
   CREATE INDEX IF NOT EXISTS idx_favorites_user ON favorites (userId);
   CREATE INDEX IF NOT EXISTS idx_favorites_recipe ON favorites (recipeId);
+  CREATE INDEX IF NOT EXISTS idx_suggestions_user ON suggestions (userId);
 `)
 
 function mapRow(row) {
@@ -259,3 +267,10 @@ try {
     db.prepare("UPDATE users SET role='user' WHERE role IS NULL").run()
   }
 } catch {}
+
+// ==== Suggestions helpers ====
+export function addSuggestion({ id, userId, text, createdAt }) {
+  const stmt = db.prepare('INSERT INTO suggestions (id, userId, text, createdAt) VALUES (?, ?, ?, ?)')
+  stmt.run(id, userId, text, createdAt)
+  return { id, userId, text, createdAt }
+}

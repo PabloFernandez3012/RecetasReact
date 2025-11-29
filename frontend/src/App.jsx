@@ -14,6 +14,7 @@ import Register from './pages/Register'
 import { useMe, logout } from './hooks/useAuth'
 import { queryClient } from './lib/queryClient'
 import { apiUrl } from './lib/api'
+import SuggestionFab from './components/SuggestionFab'
 
 export default function App() {
   const hasToken = Boolean(localStorage.getItem('auth_token'))
@@ -78,6 +79,7 @@ export default function App() {
         </Routes>
       </main>
       <Footer />
+      <SuggestionFab />
     </Container>
   )
 }
