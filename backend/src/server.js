@@ -5,7 +5,7 @@ import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
 import { promises as fs } from 'fs';
 import { nanoid } from 'nanoid';
-import { getAllRecipes, getAllRecipesSummary, getRecipe, createRecipe, updateRecipe, deleteRecipe, migrateFromJsonIfEmpty, paths, addFavorite, removeFavorite, getFavorites, getFavoriteIds, addSuggestion } from './db.js';
+import { getAllRecipes, getAllRecipesSummary, getRecipe, createRecipe, updateRecipe, deleteRecipe, migrateFromJsonIfEmpty, paths, addFavorite, removeFavorite, getFavorites, getFavoriteIds, addSuggestion, getSuggestions, deleteSuggestion } from './db.js';
 import { registerUser, loginUser, authMiddleware, getMe, updateProfile, isAdmin } from './auth.js';
 import net from 'net';
 
@@ -173,6 +173,25 @@ app.post('/api/suggestions', authMiddleware, (req, res) => {
   } catch (err) {
     res.status(500).json({ error: 'Error creando sugerencia', details: String(err) })
   }
+})
+
+// Listar sugerencias (solo admin)
+app.get('/api/suggestions', authMiddleware, (req, res) => {
+  if (!isAdmin(req.userId)) return res.status(403).json({ error: 'Solo administradores' })
+  try {
+    const items = getSuggestions()
+    res.json(items)
+  } catch (err) {
+    res.status(500).json({ error: 'Error leyendo sugerencias', details: String(err) })
+  }
+})
+
+// Eliminar sugerencia (solo admin)
+app.delete('/api/suggestions/:id', authMiddleware, (req, res) => {
+  if (!isAdmin(req.userId)) return res.status(403).json({ error: 'Solo administradores' })
+  const ok = deleteSuggestion(req.params.id)
+  if (!ok) return res.status(404).json({ error: 'Sugerencia no encontrada' })
+  res.status(204).send()
 })
 
 app.post('/api/recipes', authMiddleware, async (req, res) => {

@@ -38,6 +38,7 @@ Aplicación de recetas con frontend en React y backend en Node.js/Express. Permi
 - **React Router** para navegación entre vistas
 - **Rutas públicas y privadas** (protección por sesión y por rol `admin`)
  - **Botón flotante de sugerencias**: usuarios autenticados pueden enviar sugerencias de recetas (POST `/api/suggestions`).
+ - **Panel de sugerencias para admin**: los administradores pueden revisar y eliminar sugerencias.
 - **React Query** para gestión de estado del servidor con caché, sincronización automática y estados de UI
 - **Filtro por categorías** y búsqueda por texto en títulos, descripciones, ingredientes y pasos
 - **Estados de UI profesionales**: Loading, Error y Empty states en todas las vistas
@@ -371,6 +372,8 @@ Si no se define, se usa un valor de desarrollo (`dev-secret`). No usar en produc
 | `POST` | `/api/recipes/:id/like` | Marcar receta como favorita | Bearer JWT |
 | `DELETE` | `/api/recipes/:id/like` | Quitar receta de favoritos | Bearer JWT |
 | `POST` | `/api/suggestions` | Enviar una sugerencia de receta | Bearer JWT |
+| `GET` | `/api/suggestions` | Listar sugerencias (admin) | Bearer JWT (admin) |
+| `DELETE` | `/api/suggestions/:id` | Eliminar sugerencia (admin) | Bearer JWT (admin) |
 
 **Estructura de receta:**
 

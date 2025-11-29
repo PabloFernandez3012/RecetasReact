@@ -274,3 +274,13 @@ export function addSuggestion({ id, userId, text, createdAt }) {
   stmt.run(id, userId, text, createdAt)
   return { id, userId, text, createdAt }
 }
+
+export function getSuggestions() {
+  const rows = db.prepare('SELECT s.id, s.userId, u.email AS userEmail, u.name AS userName, s.text, s.createdAt FROM suggestions s LEFT JOIN users u ON u.id = s.userId ORDER BY datetime(s.createdAt) DESC').all()
+  return rows
+}
+
+export function deleteSuggestion(id) {
+  const info = db.prepare('DELETE FROM suggestions WHERE id = ?').run(id)
+  return info.changes > 0
+}

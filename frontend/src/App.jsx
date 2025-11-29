@@ -9,6 +9,7 @@ import RecipeDetail from './pages/RecipeDetail'
 import RecipeForm from './pages/RecipeForm'
 import Profile from './pages/Profile'
 import Favorites from './pages/Favorites'
+import AdminSuggestions from './pages/AdminSuggestions'
 import Login from './pages/Login'
 import Register from './pages/Register'
 import { useMe, logout } from './hooks/useAuth'
@@ -50,6 +51,9 @@ export default function App() {
           {hasToken && isSuccess && me?.role === 'admin' && (
             <Link to="/new" className="btn icon" title="Nueva receta" aria-label="Nueva receta" style={{marginLeft:4}}>+</Link>
           )}
+          {hasToken && isSuccess && me?.role === 'admin' && (
+            <Link to="/admin/suggestions" className="btn" style={{background:'#555'}}>Sugerencias</Link>
+          )}
           <div style={{flexGrow:1}} />
           {hasToken && isSuccess ? (
             <>
@@ -76,6 +80,7 @@ export default function App() {
           <Route path="/register" element={<Register />} />
           <Route path="/profile" element={hasToken && isSuccess ? <Profile /> : <Login />} />
           <Route path="/favorites" element={hasToken && isSuccess ? <Favorites /> : <Login />} />
+          <Route path="/admin/suggestions" element={isSuccess && me?.role === 'admin' ? <AdminSuggestions /> : <Login />} />
         </Routes>
       </main>
       <Footer />
