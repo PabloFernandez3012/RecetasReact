@@ -450,7 +450,121 @@ legend {
   100% { background-position: -200% 0 }
 }
 
-// MegaMenu styles
+// Tab Menu styles (nuevo diseño horizontal)
+.tab-menu {
+  position: relative;
+  width: 100%;
+  
+  .tab-menu-tabs {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    padding: 8px 0;
+  }
+  
+  .tab-menu-tab {
+    background: var(--card);
+    border: 1px solid var(--card-b);
+    border-radius: 8px;
+    padding: 8px 14px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.9em;
+    font-weight: 500;
+    color: var(--fg);
+    transition: all .2s ease;
+    
+    &:hover {
+      background: var(--accent);
+      color: #fff;
+      border-color: var(--accent);
+    }
+    
+    &.active {
+      background: var(--accent);
+      color: #fff;
+      border-color: var(--accent);
+    }
+  }
+  
+  .tab-icon {
+    font-size: 1.1em;
+  }
+  
+  .tab-label {
+    white-space: nowrap;
+  }
+  
+  .tab-menu-content {
+    position: absolute;
+    left: 0;
+    top: 100%;
+    background: var(--card);
+    border: 1px solid var(--card-b);
+    border-radius: 10px;
+    box-shadow: 0 8px 24px rgba(0,0,0,.15);
+    padding: 12px;
+    z-index: 20;
+    margin-top: 4px;
+    min-width: 300px;
+    max-width: 500px;
+  }
+  
+  .tab-menu-items {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 6px;
+  }
+  
+  .tab-menu-item {
+    background: transparent;
+    border: none;
+    color: var(--fg);
+    font-size: 0.9em;
+    padding: 8px 12px;
+    text-align: left;
+    cursor: pointer;
+    border-radius: 6px;
+    transition: background .15s;
+    
+    &:hover {
+      background: var(--card-b);
+    }
+    
+    &.active {
+      background: var(--accent);
+      color: #fff;
+      font-weight: 600;
+    }
+  }
+  
+  @media (max-width: 600px) {
+    .tab-menu-tabs {
+      gap: 6px;
+    }
+    
+    .tab-menu-tab {
+      padding: 6px 10px;
+      font-size: 0.85em;
+    }
+    
+    .tab-label {
+      display: none;
+    }
+    
+    .tab-menu-content {
+      min-width: 250px;
+    }
+    
+    .tab-menu-items {
+      grid-template-columns: 1fr;
+    }
+  }
+}
+
+// MegaMenu styles (legacy - se puede eliminar si no se usa)
 .megamenu {
   position: relative;
   .megamenu-trigger {
@@ -474,34 +588,48 @@ legend {
     border: 1px solid var(--card-b, #1f2937);
     border-radius: 14px;
     box-shadow: 0 8px 32px rgba(0,0,0,.18);
-    min-width: 480px;
+    width: 750px;
+    max-width: 90vw;
     z-index: 20;
-    padding: 18px 24px;
+    padding: 16px 20px;
   }
   .megamenu-cols {
-    display: flex;
-    gap: 32px;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px 24px;
   }
   .megamenu-col {
-    min-width: 120px;
+    min-width: 0;
+    
+    ul {
+      list-style: none !important;
+      padding: 0 !important;
+      margin: 0 !important;
+      display: block !important;
+    }
+    
+    li {
+      display: block !important;
+      width: 100%;
+    }
   }
   .megamenu-col-title {
     font-weight: 700;
-    margin-bottom: 8px;
+    margin-bottom: 6px;
     display: flex;
     align-items: center;
     gap: 6px;
-    font-size: 1.1em;
+    font-size: 0.95em;
   }
   .megamenu-icon {
-    font-size: 1.3em;
+    font-size: 1.1em;
   }
   .megamenu-link {
     background: none;
     border: none;
     color: var(--fg);
-    font-size: 1em;
-    padding: 6px 0;
+    font-size: 0.9em;
+    padding: 3px 8px;
     text-align: left;
     width: 100%;
     cursor: pointer;

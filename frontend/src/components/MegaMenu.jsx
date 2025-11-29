@@ -63,44 +63,48 @@ const MENU = [
 
 export default function MegaMenu() {
   const [sp, setSp] = useSearchParams()
-  const [open, setOpen] = useState(false)
+  const [activeTab, setActiveTab] = useState(null)
   const cat = sp.get('cat') || ''
 
   const handleSelect = (key) => {
     setSp({ cat: key })
-    setOpen(false)
+  }
+
+  const handleTabClick = (key) => {
+    setActiveTab(activeTab === key ? null : key)
   }
 
   useEffect(() => {
-    const close = () => setOpen(false)
-    if (open) document.addEventListener('click', close)
+    const close = () => setActiveTab(null)
+    if (activeTab) document.addEventListener('click', close)
     return () => document.removeEventListener('click', close)
-  }, [open])
+  }, [activeTab])
 
   return (
-    <div className="megamenu">
-      <button className="megamenu-trigger" onClick={e => { e.stopPropagation(); setOpen(v => !v) }}>
-        <span>Recetas</span> <span style={{fontSize:'1.2em'}}>▼</span>
-      </button>
-      {open && (
-        <div className="megamenu-dropdown" onClick={e => e.stopPropagation()}>
-          <div className="megamenu-cols">
-            {MENU.map(col => (
-              <div key={col.key} className="megamenu-col">
-                <div className="megamenu-col-title">
-                  <span className="megamenu-icon">{col.icon}</span> {col.label}
-                </div>
-                <ul>
-                  {col.subs.map(sub => (
-                    <li key={sub.key}>
-                      <button
-                        className={`megamenu-link${cat === sub.key ? ' active' : ''}`}
-                        onClick={() => handleSelect(sub.key)}
-                      >{sub.label}</button>
-                    </li>
-                  ))}
-                </ul>
-              </div>
+    <div className="tab-menu">
+      <div className="tab-menu-tabs">
+        {MENU.map(tab => (
+          <button
+            key={tab.key}
+            className={`tab-menu-tab${activeTab === tab.key ? ' active' : ''}`}
+            onClick={(e) => { e.stopPropagation(); handleTabClick(tab.key) }}
+          >
+            <span className="tab-icon">{tab.icon}</span>
+            <span className="tab-label">{tab.label}</span>
+          </button>
+        ))}
+      </div>
+      {activeTab && (
+        <div className="tab-menu-content" onClick={e => e.stopPropagation()}>
+          <div className="tab-menu-items">
+            {MENU.find(m => m.key === activeTab)?.subs.map(sub => (
+              <button
+                key={sub.key}
+                className={`tab-menu-item${cat === sub.key ? ' active' : ''}`}
+                onClick={() => handleSelect(sub.key)}
+              >
+                {sub.label}
+              </button>
             ))}
           </div>
         </div>

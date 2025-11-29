@@ -47,7 +47,6 @@ export default function App() {
         <h1><Link to="/">Recetas de Pablo</Link></h1>
         <ThemeToggle />
         <nav style={{display:'flex',alignItems:'center',gap:12,flexWrap:'wrap', width:'100%'}}>
-          <MegaMenu />
           {hasToken && isSuccess && me?.role === 'admin' && (
             <Link to="/new" className="btn icon" title="Nueva receta" aria-label="Nueva receta" style={{marginLeft:4}}>+</Link>
           )}
@@ -69,6 +68,7 @@ export default function App() {
             </>
           )}
         </nav>
+        <MegaMenu />
       </header>
       <main>
         <Routes>
