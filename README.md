@@ -35,6 +35,8 @@ Aplicación de recetas con frontend en React y backend en Node.js/Express. Permi
 ## Características
 
 - **CRUD completo** de recetas (título, descripción, ingredientes, pasos, imagen, categorías)
+- **React Router** para navegación entre vistas
+- **Rutas públicas y privadas** (protección por sesión y por rol `admin`)
 - **React Query** para gestión de estado del servidor con caché, sincronización automática y estados de UI
 - **Filtro por categorías** y búsqueda por texto en títulos, descripciones, ingredientes y pasos
 - **Estados de UI profesionales**: Loading, Error y Empty states en todas las vistas
@@ -45,6 +47,16 @@ Aplicación de recetas con frontend en React y backend en Node.js/Express. Permi
 - **Custom hooks** para reutilización de lógica de fetching y mutations
 - **Autenticación JWT** (registro, login, sesión y protección de rutas de escritura)
 - **Favoritos**: marcar recetas como favoritas (like) y verlas en una sección dedicada
+
+---
+
+## Temas aplicados
+
+- **React Router**: Navegación y rutas en `frontend/src/App.jsx` y envoltura en `frontend/src/main.jsx`.
+- **Rutas públicas y privadas**: Condicionales de acceso por sesión y rol:
+  - Rutas solo autenticado: `/profile`, `/favorites`.
+  - Rutas solo administrador: `/new`, `/edit/:id`.
+- **Context / useReducer / useRef / createPortal**: No se utilizan actualmente porque no son necesarios para el alcance del proyecto; se dejan como opcionales y pueden añadirse si el requerimiento lo demanda.
 
 ---
 
