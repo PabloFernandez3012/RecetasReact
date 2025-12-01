@@ -5,7 +5,8 @@ import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
 import { promises as fs } from 'fs';
 import { nanoid } from 'nanoid';
-import { getAllRecipes, getAllRecipesSummary, getRecipe, createRecipe, updateRecipe, deleteRecipe, migrateFromJsonIfEmpty, paths, addFavorite, removeFavorite, getFavorites, getFavoriteIds, addSuggestion, getSuggestions, deleteSuggestion } from './db.js';
+import { getAllRecipes, getAllRecipesSummary, getRecipe, createRecipe, updateRecipe, deleteRecipe, migrateFromJsonIfEmpty, paths, addFavorite, removeFavorite, getFavorites, getFavoriteIds, addSuggestion, getSuggestions, deleteSuggestion, addComment, getCommentsForRecipe, getCommentById, deleteComment, updateCommentText, setCommentReaction, getCommentReactionSummary } from './db.js';
+import jwt from 'jsonwebtoken';
 import { registerUser, loginUser, authMiddleware, getMe, updateProfile, isAdmin } from './auth.js';
 import net from 'net';
 
@@ -192,6 +193,84 @@ app.delete('/api/suggestions/:id', authMiddleware, (req, res) => {
   const ok = deleteSuggestion(req.params.id)
   if (!ok) return res.status(404).json({ error: 'Sugerencia no encontrada' })
   res.status(204).send()
+})
+
+// Comentarios por receta
+const JWT_SECRET = process.env.JWT_SECRET || 'dev-secret'
+function optionalAuth(req, _res, next) {
+  const header = req.headers.authorization || ''
+  const [, token] = header.split(' ')
+  if (token) {
+    try { req.userId = jwt.verify(token, JWT_SECRET).sub } catch {}
+  }
+  next()
+}
+
+app.get('/api/recipes/:id/comments', optionalAuth, (req, res) => {
+  const recipeId = req.params.id
+  const r = getRecipe(recipeId)
+  if (!r) return res.status(404).json({ error: 'Receta no encontrada' })
+  try {
+    const items = getCommentsForRecipe(recipeId, req.userId || null)
+    res.json(items)
+  } catch (err) {
+    res.status(500).json({ error: 'Error leyendo comentarios', details: String(err) })
+  }
+})
+
+app.post('/api/recipes/:id/comments', authMiddleware, (req, res) => {
+  const recipeId = req.params.id
+  const r = getRecipe(recipeId)
+  if (!r) return res.status(404).json({ error: 'Receta no encontrada' })
+  const text = String(req.body?.text || '').trim()
+  if (!text) return res.status(400).json({ error: 'Texto de comentario requerido' })
+  try {
+    const item = addComment({ id: nanoid(12), recipeId, userId: req.userId, text, createdAt: new Date().toISOString() })
+    res.status(201).json(item)
+  } catch (err) {
+    res.status(500).json({ error: 'Error creando comentario', details: String(err) })
+  }
+})
+
+app.delete('/api/comments/:id', authMiddleware, (req, res) => {
+  const id = req.params.id
+  const item = getCommentById(id)
+  if (!item) return res.status(404).json({ error: 'Comentario no encontrado' })
+  // Solo autor o admin puede eliminar
+  if (!(item.userId === req.userId || isAdmin(req.userId))) {
+    return res.status(403).json({ error: 'No autorizado para eliminar' })
+  }
+  const ok = deleteComment(id)
+  if (!ok) return res.status(500).json({ error: 'No se pudo eliminar' })
+  res.status(204).send()
+})
+
+// Editar comentario (autor o admin)
+app.put('/api/comments/:id', authMiddleware, (req, res) => {
+  const id = req.params.id
+  const item = getCommentById(id)
+  if (!item) return res.status(404).json({ error: 'Comentario no encontrado' })
+  if (!(item.userId === req.userId || isAdmin(req.userId))) {
+    return res.status(403).json({ error: 'No autorizado para editar' })
+  }
+  const text = String(req.body?.text || '').trim()
+  if (!text) return res.status(400).json({ error: 'Texto requerido' })
+  const ok = updateCommentText(id, text)
+  if (!ok) return res.status(500).json({ error: 'No se pudo actualizar' })
+  const updated = getCommentById(id)
+  res.json(updated)
+})
+
+// Reacciones: like/dislike o limpiar
+app.post('/api/comments/:id/react', authMiddleware, (req, res) => {
+  const id = req.params.id
+  const item = getCommentById(id)
+  if (!item) return res.status(404).json({ error: 'Comentario no encontrado' })
+  let value = Number(req.body?.value)
+  if (![1, -1, 0].includes(value)) return res.status(400).json({ error: 'value debe ser 1, -1 o 0' })
+  setCommentReaction(req.userId, id, value)
+  const summary = getCommentReactionSummary(id, req.userId)
+  res.json(summary)
 })
 
 app.post('/api/recipes', authMiddleware, async (req, res) => {

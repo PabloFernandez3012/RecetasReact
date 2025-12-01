@@ -55,11 +55,31 @@ db.exec(`
     createdAt TEXT NOT NULL,
     FOREIGN KEY (userId) REFERENCES users(id) ON DELETE CASCADE
   );
+  CREATE TABLE IF NOT EXISTS comments (
+    id TEXT PRIMARY KEY,
+    recipeId TEXT NOT NULL,
+    userId TEXT NOT NULL,
+    text TEXT NOT NULL,
+    createdAt TEXT NOT NULL,
+    FOREIGN KEY (recipeId) REFERENCES recipes(id) ON DELETE CASCADE,
+    FOREIGN KEY (userId) REFERENCES users(id) ON DELETE CASCADE
+  );
   -- Índices para mejorar rendimiento en listados y favoritos
   CREATE INDEX IF NOT EXISTS idx_recipes_createdAt ON recipes (createdAt);
   CREATE INDEX IF NOT EXISTS idx_favorites_user ON favorites (userId);
   CREATE INDEX IF NOT EXISTS idx_favorites_recipe ON favorites (recipeId);
   CREATE INDEX IF NOT EXISTS idx_suggestions_user ON suggestions (userId);
+  CREATE INDEX IF NOT EXISTS idx_comments_recipe ON comments (recipeId, createdAt);
+  CREATE TABLE IF NOT EXISTS comment_reactions (
+    commentId TEXT NOT NULL,
+    userId TEXT NOT NULL,
+    value INTEGER NOT NULL CHECK (value IN (-1, 1)),
+    createdAt TEXT NOT NULL,
+    PRIMARY KEY (commentId, userId),
+    FOREIGN KEY (commentId) REFERENCES comments(id) ON DELETE CASCADE,
+    FOREIGN KEY (userId) REFERENCES users(id) ON DELETE CASCADE
+  );
+  CREATE INDEX IF NOT EXISTS idx_comment_reactions_comment ON comment_reactions (commentId);
 `)
 
 function mapRow(row) {
@@ -283,4 +303,70 @@ export function getSuggestions() {
 export function deleteSuggestion(id) {
   const info = db.prepare('DELETE FROM suggestions WHERE id = ?').run(id)
   return info.changes > 0
+}
+
+// ==== Comments helpers ====
+export function addComment({ id, recipeId, userId, text, createdAt }) {
+  const stmt = db.prepare('INSERT INTO comments (id, recipeId, userId, text, createdAt) VALUES (?, ?, ?, ?, ?)')
+  stmt.run(id, recipeId, userId, text, createdAt)
+  return getCommentById(id)
+}
+
+export function getCommentsForRecipe(recipeId, currentUserId = null) {
+  const stmt = db.prepare(`
+    SELECT c.id, c.recipeId, c.userId, c.text, c.createdAt,
+           u.email AS userEmail, u.name AS userName,
+           (SELECT COUNT(*) FROM comment_reactions r WHERE r.commentId = c.id AND r.value = 1) AS likes,
+           (SELECT COUNT(*) FROM comment_reactions r WHERE r.commentId = c.id AND r.value = -1) AS dislikes,
+           (SELECT value FROM comment_reactions r WHERE r.commentId = c.id AND r.userId = @uid) AS myVote
+    FROM comments c
+    LEFT JOIN users u ON u.id = c.userId
+    WHERE c.recipeId = @rid
+    ORDER BY datetime(c.createdAt) ASC
+  `)
+  const rows = stmt.all({ rid: recipeId, uid: currentUserId })
+  return rows
+}
+
+export function getCommentById(id) {
+  const row = db.prepare(`
+    SELECT c.id, c.recipeId, c.userId, c.text, c.createdAt,
+           u.email AS userEmail, u.name AS userName
+    FROM comments c
+    LEFT JOIN users u ON u.id = c.userId
+    WHERE c.id = ?
+  `).get(id)
+  return row || null
+}
+
+export function deleteComment(id) {
+  const info = db.prepare('DELETE FROM comments WHERE id = ?').run(id)
+  return info.changes > 0
+}
+
+export function updateCommentText(id, text) {
+  const info = db.prepare('UPDATE comments SET text = ? WHERE id = ?').run(text, id)
+  return info.changes > 0
+}
+
+export function setCommentReaction(userId, commentId, value) {
+  if (!value) {
+    const info = db.prepare('DELETE FROM comment_reactions WHERE commentId = ? AND userId = ?').run(commentId, userId)
+    return info.changes > 0
+  }
+  const now = new Date().toISOString()
+  const stmt = db.prepare('INSERT INTO comment_reactions (commentId, userId, value, createdAt) VALUES (?, ?, ?, ?) ON CONFLICT(commentId, userId) DO UPDATE SET value=excluded.value, createdAt=excluded.createdAt')
+  stmt.run(commentId, userId, value, now)
+  return true
+}
+
+export function getCommentReactionSummary(commentId, userId = null) {
+  const likes = db.prepare('SELECT COUNT(*) as c FROM comment_reactions WHERE commentId = ? AND value = 1').get(commentId).c
+  const dislikes = db.prepare('SELECT COUNT(*) as c FROM comment_reactions WHERE commentId = ? AND value = -1').get(commentId).c
+  let myVote = null
+  if (userId) {
+    const row = db.prepare('SELECT value FROM comment_reactions WHERE commentId = ? AND userId = ?').get(commentId, userId)
+    myVote = row ? row.value : null
+  }
+  return { likes, dislikes, myVote }
 }
